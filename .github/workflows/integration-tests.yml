@@ -1,0 +1,58 @@
+# .github/workflows/postgres.yml
+name: Integration testing with PostgreSQL
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres_user
+          POSTGRES_PASSWORD: postgres_password
+          POSTGRES_DB: postgres_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Install dependencies
+        run: yarn install
+      - name: Run migrations
+        env:
+          DATABASE_URL: postgres://postgres_user:postgres_password@localhost:5432/postgres_db
+        run:
+          yarn prisma migrate dev
+      - name: Seed database
+        env:
+          DATABASE_URL: postgres://postgres_user:postgres_password@localhost:5432/postgres_db
+        run:
+          yarn db:seed
+      - name: Run jest tests
+        env:
+          DATABASE_URL: postgres://postgres_user:postgres_password@localhost:5432/postgres_db
+          JWT_SECRET: asdf
+        run:
+           yarn test
