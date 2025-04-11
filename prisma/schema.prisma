@@ -25,6 +25,8 @@ model User {
   resetPasswordToken String?
   accessToken        String?
   refreshToken       String[]          @default([])
+  editorId           Int?
+  editor             Editor?
 }
 
 model VerificationCode {
@@ -38,4 +40,44 @@ model VerificationCode {
 enum Role {
   USER
   ADMIN
+}
+
+model Source {
+  id        Int       @id @default(autoincrement())
+  key       String    @unique
+  name      String
+  icon      String
+  feedUrl   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  articles  Article[]
+  editors   Editor[]
+}
+
+model Editor {
+  id        Int       @id @default(autoincrement())
+  name      String
+  userId    Int?      @unique
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceId  Int
+  source    Source    @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  articles  Article[] @relation("ArticleEditors")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Article {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  content     String?
+  url         String
+  image       String?
+  sourceId    Int
+  categories  String[]
+  source      Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  editors     Editor[] @relation("ArticleEditors")
+  uploadedAt  DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

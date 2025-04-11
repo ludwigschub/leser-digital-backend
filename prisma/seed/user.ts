@@ -15,6 +15,7 @@ const getUsers = async () => [
     email: "test@example.com",
     password: await hashPassword("testPassword"),
     name: "TestUser",
+    verified: true,
     role: Role.USER,
   },
   {
