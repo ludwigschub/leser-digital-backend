@@ -2,7 +2,6 @@ import http from "http"
 
 import express from "express"
 
-import { ApolloServer } from "@apollo/server"
 import { expressMiddleware } from "@apollo/server/express4"
 import cors from "cors"
 
@@ -34,7 +33,7 @@ server.start().then(async () => {
 
   app.use(
     "/graphql",
-    expressMiddleware(server as unknown as ApolloServer, {
+    expressMiddleware(server, {
       context: createContext,
     })
   )

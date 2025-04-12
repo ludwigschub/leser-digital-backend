@@ -295,7 +295,7 @@ export const UserMutations = objectType({
         // istanbul ignore next-line
         if (res) res.clearCookie("refresh_token")
         return await prisma.user.update({
-          where: { id: user.id },
+          where: { id: user?.id },
           data: { accessToken: null, refreshToken: [] },
         })
       },

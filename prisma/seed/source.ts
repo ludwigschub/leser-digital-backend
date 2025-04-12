@@ -7,13 +7,13 @@ const getSources = async () => [
   {
     key: "zeit",
     name: "ZEIT ONLINE",
-    icon: "https://static.zeit.de/p/zeit.web/icons/favicon.svg",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/9/98/Logo_Zeit_Online_2017.svg",
     feedUrl: ZEIT_RSS_FEED,
   },
   {
     key: "spiegel",
     name: "SPIEGEL Online",
-    icon: "https://cdn.prod.www.spiegel.de/public/spon/images/icons/favicon.ico",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Logo-der_spiegel.svg",
     feedUrl: SPIEGEL_RSS_FEED,
   },
 ]

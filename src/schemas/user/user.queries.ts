@@ -1,11 +1,11 @@
 import { GraphQLError } from "graphql";
-import { objectType } from "nexus";
+import { extendType } from "nexus";
 
 import { Context } from "../../context";
 import prisma from "../../prismaClient";
 
-export const UserQueries = objectType({
-  name: "Query",
+export const UserQueries = extendType({
+  type: "Query",
   definition(t) {
     t.nonNull.field("loggedIn", {
       type: "User",

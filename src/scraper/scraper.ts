@@ -42,9 +42,9 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
           const articleConverter = new converter(source, item)
           const article = await articleConverter.convertArticle()
           if (debug && article) {
-            console.debug(`📝 Article: ${article.title} (${article.link})`)
+            console.debug(`📝 Article: ${article.title} (${article.url})`)
             console.debug(`🗃️ Categories: ${article.categories}`)
-            console.debug(`⏰ Published: ${article.pubDate}`)
+            console.debug(`⏰ Published: ${article.uploadedAt}`)
             console.debug(`✍️ Creator: ${article.creators}`)
           }
           if (!dry && article) {
@@ -53,20 +53,38 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
                 getOrCreateEditor(creator, source)
               )
             )
-            await prisma.article.create({
-              data: {
+            const newArticleInput = {
+              title: article.title,
+              url: article.url,
+              uploadedAt: article.uploadedAt,
+              categories: article.categories,
+              description: article.description,
+              image: article.image,
+              premium: article.premium,
+              source: { connect: { key } },
+              editors: {
+                connect: editors.map((editor) => ({
+                  id: editor.id,
+                })),
+              },
+            }
+            const exists = await prisma.article.findFirst({
+              where: {
                 title: article.title,
-                url: article.link,
-                uploadedAt: new Date(article.pubDate),
-                categories: article.categories,
-                source: { connect: { key } },
-                editors: {
-                  connect: editors.map((editor) => ({
-                    id: editor.id,
-                  })),
-                },
+                source: { key },
+                url: article.url,
               },
             })
+            if (exists) {
+              await prisma.article.update({
+                data: newArticleInput,
+                where: { id: exists.id },
+              })
+            } else {
+              await prisma.article.create({
+                data: newArticleInput,
+              })
+            }
           }
         })
       ).then(() => {

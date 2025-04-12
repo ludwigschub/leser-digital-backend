@@ -1,6 +1,6 @@
-import { Role } from "@prisma/client";
+import { Role } from "@prisma/client"
 
-import prisma from "../../src/prismaClient";
+import prisma from "../../src/prismaClient"
 
 export const hashPassword = async (password: string) => {
   const passwordHash = await crypto.subtle.digest(
@@ -25,13 +25,13 @@ const getUsers = async () => [
     verified: true,
     role: Role.ADMIN,
   },
-];
+]
 
 export const seedUsers = async () => {
-  const users = await getUsers();
+  const users = await getUsers()
   await Promise.all(
     users.map(async (user) => {
-      await prisma.user.create({ data: user });
+      await prisma.user.create({ data: user })
     })
-  );
-};
+  )
+}

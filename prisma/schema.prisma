@@ -5,6 +5,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 generator nexusPrisma {
@@ -25,8 +26,6 @@ model User {
   resetPasswordToken String?
   accessToken        String?
   refreshToken       String[]          @default([])
-  editorId           Int?
-  editor             Editor?
 }
 
 model VerificationCode {
@@ -46,7 +45,7 @@ model Source {
   id        Int       @id @default(autoincrement())
   key       String    @unique
   name      String
-  icon      String
+  logo      String
   feedUrl   String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -57,11 +56,9 @@ model Source {
 model Editor {
   id        Int       @id @default(autoincrement())
   name      String
-  userId    Int?      @unique
-  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   sourceId  Int
   source    Source    @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  articles  Article[] @relation("ArticleEditors")
+  articles  Article[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -73,10 +70,11 @@ model Article {
   content     String?
   url         String
   image       String?
-  sourceId    Int
   categories  String[]
+  premium     Boolean  @default(false)
+  sourceId    Int
   source      Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  editors     Editor[] @relation("ArticleEditors")
+  editors     Editor[]
   uploadedAt  DateTime
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

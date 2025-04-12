@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken"
 import prisma from "./prismaClient"
 
 export interface Context extends ExpressContextFunctionArgument {
-  user: User
+  user?: User | null
   prisma: PrismaClient
 }
 
@@ -16,7 +16,7 @@ export const isCodeExpired = (expiresAt: number) => {
 export const createContext = async ({
   req,
   res,
-}: ExpressContextFunctionArgument) => {
+}: ExpressContextFunctionArgument): Promise<Context> => {
   // Get the user from the token in authorization header
   const token = req.headers.authorization || ""
   const hash = token.split(" ")[1]

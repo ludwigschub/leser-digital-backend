@@ -9,7 +9,7 @@ import { permissions } from "./permission";
 import schema from "./schema";
 
 // Initialize GraphQL server
-export const createServer = (httpServer: http.Server) => {
+export const createServer = (httpServer: http.Server): ApolloServer<Context> => {
   const schemaWithPermissions = applyMiddleware(schema, permissions);
 
   return new ApolloServer<Context>({

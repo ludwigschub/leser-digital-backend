@@ -10,6 +10,7 @@ export default tseslint.config(
     ignores: [
       "coverage",
       "node_modules",
+      "src/generated/**/*",
       "jest.config.js",
     ],
     languageOptions: {

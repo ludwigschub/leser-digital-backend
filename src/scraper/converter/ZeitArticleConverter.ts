@@ -4,8 +4,7 @@ import { BaseArticleConverter } from "./BaseArticleConverter"
 
 export class ZeitArticleConverter extends BaseArticleConverter {
   public convertTitle(this: BaseArticleConverter, title: string): string {
-    const first = title.substring(0, title.indexOf(": ") + 2)
-    return title.replace(first, "")
+    return title
   }
 
   public convertCreators(
