@@ -1,4 +1,4 @@
-import { inputObjectType, objectType } from "nexus"
+import { inputObjectType, nullable, objectType } from "nexus"
 import { Article as ArticleType } from "nexus-prisma"
 
 export const Article = objectType({
@@ -18,6 +18,17 @@ export const Article = objectType({
     t.field(ArticleType.uploadedAt)
     t.field(ArticleType.createdAt)
     t.field(ArticleType.updatedAt)
+    t.field("activity", {
+      type: nullable("ArticleActivity"),
+      resolve: (parent, _args, { prisma, user }) => {
+        return prisma.articleActivity.findFirst({
+          where: {
+            articleId: parent.id,
+            userId: user?.id,
+          },
+        })
+      },
+    })
   },
 })
 

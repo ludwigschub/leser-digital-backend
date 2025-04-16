@@ -26,6 +26,7 @@ model User {
   resetPasswordToken String?
   accessToken        String?
   refreshToken       String[]          @default([])
+  articleActivity    ArticleActivity[]
 }
 
 model VerificationCode {
@@ -64,18 +65,35 @@ model Editor {
 }
 
 model Article {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String?
-  content     String?
-  url         String
-  image       String?
-  categories  String[]
-  premium     Boolean  @default(false)
-  sourceId    Int
-  source      Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  editors     Editor[]
-  uploadedAt  DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              Int               @id @default(autoincrement())
+  title           String
+  description     String?
+  content         String?
+  url             String
+  image           String?
+  categories      String[]
+  premium         Boolean           @default(false)
+  sourceId        Int
+  source          Source            @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  editors         Editor[]
+  uploadedAt      DateTime
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  activity ArticleActivity[]
+}
+
+enum ArticleActivityType {
+  VIEW_ARTICLE
+  SAVE_ARTICLE
+}
+
+model ArticleActivity {
+  id        Int                 @id @default(autoincrement())
+  type      ArticleActivityType
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  userId    Int
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articleId Int
+  article   Article             @relation(fields: [articleId], references: [id], onDelete: Cascade)
 }
