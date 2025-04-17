@@ -15,5 +15,6 @@ export const createServer = (httpServer: http.Server): ApolloServer<Context> => 
   return new ApolloServer<Context>({
     schema: schemaWithPermissions,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    introspection: process.env.NODE_ENV === "development",
   });
 };

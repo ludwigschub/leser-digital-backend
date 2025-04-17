@@ -106,6 +106,7 @@ export const UserMutations = objectType({
         // istanbul ignore next-line
         if (res) {
           res.cookie("refresh_token", refreshToken, {
+            secure: true,
             httpOnly: true,
             path: "/graphql/",
           })
@@ -132,10 +133,10 @@ export const UserMutations = objectType({
             const [name, value] = cookie.trim().split("=")
             return { ...all, [name]: value }
           }, {} as Record<string, string>) ?? {}
-        const refreshToken = cookies["refresh_token"]
+        const refreshTokenHash = cookies["refresh_token"]
 
         try {
-          jwt.verify(refreshToken, process.env.JWT_SECRET!)
+          jwt.verify(refreshTokenHash, process.env.JWT_SECRET!)
         } catch {
           // istanbul ignore next-line
           if (res) {
@@ -146,11 +147,25 @@ export const UserMutations = objectType({
           })
         }
 
+        const decoded = jwt.decode(refreshTokenHash) as {
+          email: string
+          exp: number
+        } | null
+        const expired = isCodeExpired((decoded?.exp || 0) * 1000)
+        if (expired || !decoded?.email) {
+          // istanbul ignore next-line
+          if (res) {
+            res.clearCookie("refresh_token")
+          }
+          throw new GraphQLError("Invalid or expired refresh token", {
+            extensions: { code: "INVALID_REFRESH_TOKEN" },
+          })
+        }
+
         const user = await prisma.user.findFirst({
-          where: { refreshToken: { has: refreshToken } },
+          where: { email: decoded?.email },
         })
-        // istanbul ignore next-line
-        if (!user) {
+        if (!user?.refreshToken.find((token) => token === refreshTokenHash)) {
           if (res) {
             res.clearCookie("refresh_token")
           }
@@ -172,6 +187,7 @@ export const UserMutations = objectType({
         // istanbul ignore next-line
         if (res) {
           res.cookie("refresh_token", newRefreshToken, {
+            path: "/graphql/",
             httpOnly: true,
             secure: true,
           })
@@ -181,7 +197,7 @@ export const UserMutations = objectType({
           data: {
             accessToken,
             refreshToken: [
-              ...user.refreshToken.filter((token) => token !== refreshToken),
+              ...user.refreshToken.filter((token) => token !== refreshTokenHash),
               newRefreshToken,
             ],
           },

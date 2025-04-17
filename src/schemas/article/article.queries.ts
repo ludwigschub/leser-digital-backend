@@ -1,6 +1,6 @@
+import { ArticleActivityType } from "@prisma/client"
 import { extendType, nullable } from "nexus"
 
-import { ArticleActivityType } from "@prisma/client"
 import { Context } from "../../context"
 
 export const articleQueries = extendType({
@@ -33,41 +33,51 @@ export const articleQueries = extendType({
       resolve: async (_parent, args, { prisma, user }: Context) => {
         const { source } = args ?? {}
 
-        return await prisma.article.findMany({
+        const activity = await prisma.articleActivity.findMany({
           where: {
-            source: source ? { key: source } : undefined,
-            activity: {
-              some: {
-                userId: user?.id,
-                type: ArticleActivityType.SAVE_ARTICLE,
-              },
+            userId: user?.id,
+            type: ArticleActivityType.SAVE_ARTICLE,
+            article: {
+              source: source ? { key: source } : undefined,
             },
           },
-          include: {
-            source: { include: { editors: false } },
+          orderBy: {
+            createdAt: "desc",
           },
+          include: { article: true },
+        })
+
+        return activity.map((activity) => {
+          return {
+            ...activity.article,
+            activity: [activity],
+          }
         })
       },
     })
     t.list.nonNull.field("viewedArticles", {
       type: "Article",
       args: { source: nullable("String") },
-      resolve: async (_parent, args, { prisma, user }: Context) => {
-        const { source } = args ?? {}
-
-        return await prisma.article.findMany({
+      resolve: async (_parent, { source }, { prisma, user }: Context) => {
+        const activity = await prisma.articleActivity.findMany({
           where: {
-            source: source ? { key: source } : undefined,
-            activity: {
-              some: {
-                userId: user?.id,
-                type: ArticleActivityType.VIEW_ARTICLE,
-              },
+            userId: user?.id,
+            type: ArticleActivityType.VIEW_ARTICLE,
+            article: {
+              source: source ? { key: source } : undefined,
             },
           },
-          include: {
-            source: { include: { editors: false } },
+          orderBy: {
+            createdAt: "desc",
           },
+          include: { article: true },
+        })
+
+        return activity.map((activity) => {
+          return {
+            ...activity.article,
+            activity: [activity],
+          }
         })
       },
     })
