@@ -15,6 +15,7 @@ interface ConvertedArticle {
   categories: string[]
   image?: string
   premium?: boolean
+  short?: boolean
 }
 
 export class BaseArticleConverter {
@@ -22,12 +23,14 @@ export class BaseArticleConverter {
   foldername: string
   item: RssParser.Item
   turndownService: TurndownService
+  article: Partial<ConvertedArticle>
 
   constructor(source: Source, item: RssParser.Item) {
     this.source = source
     this.item = item
     this.foldername = toKebabCase(source.name)
     this.turndownService = new TurndownService()
+    this.article = {}
   }
 
   public async convertArticle(this: BaseArticleConverter) {
@@ -48,42 +51,37 @@ export class BaseArticleConverter {
       }
       const response = await axios.get(url)
       const dom = new JSDOM(response.data)
-      const html = dom.window.document.querySelector("article")?.innerHTML
+      const head = dom.window.document.head.innerHTML
+      const html = dom.window.document.body.innerHTML
 
       if (!html) {
         console.log("❌ No content found. Skipping...")
         return
       }
 
-      const title = this.convertTitle(rawTitle, html)
+      this.article.title = this.convertTitle(rawTitle, html, head)
 
-      const description = this.convertDescription(
+      this.article.description = this.convertDescription(
         rawDescription ?? rawContentSnippet,
-        html
+        html,
+        head
       )
 
-      const premium = this.isPaywalled(html)
+      this.article.uploadedAt = new Date(pubDate)
 
-      const uploadedAt = new Date(pubDate)
+      this.article.image = this.convertImage(enclosure, html, head)
 
-      const image = this.convertImage(enclosure, html)
+      this.article.creators = this.convertCreators(creator, html, head)
 
-      const creators = this.convertCreators(creator, html)
+      this.article.categories = this.convertCategories(rawCategories, html, head)
 
-      const categories = this.convertCategories(rawCategories, html)
+      this.article.short = this.isShort(html, head)
 
-      const article: ConvertedArticle = {
-        title,
-        description,
-        uploadedAt,
-        url,
-        image,
-        creators,
-        categories,
-        premium,
-      }
+      this.article.premium = this.isPaywalled(html, head)
 
-      return article
+      this.article.url = url
+
+      return this.article as ConvertedArticle
     } catch (error) {
       console.error("Error fetching full article content:", error)
       return undefined
@@ -93,7 +91,8 @@ export class BaseArticleConverter {
   public convertTitle(
     this: BaseArticleConverter,
     title: string,
-    _html: string
+    _html: string,
+    _head: string
   ): string {
     return title
   }
@@ -101,7 +100,8 @@ export class BaseArticleConverter {
   public convertDescription(
     this: BaseArticleConverter,
     description: string | undefined,
-    _html: string
+    _html: string,
+    _head: string
   ): string {
     return description ?? ""
   }
@@ -109,7 +109,8 @@ export class BaseArticleConverter {
   public convertImage(
     this: BaseArticleConverter,
     enclosure: RssParser.Enclosure | undefined,
-    _html: string
+    _html: string,
+    _head: string
   ): string | undefined {
     if (
       (enclosure?.type === "image/jpeg" || enclosure?.type === "image/png") &&
@@ -123,7 +124,8 @@ export class BaseArticleConverter {
   public convertCreators(
     this: BaseArticleConverter,
     creator: string | undefined,
-    _html: string
+    _html: string,
+    _head: string
   ): string[] {
     if (!creator) {
       return [this.source.name]
@@ -135,12 +137,21 @@ export class BaseArticleConverter {
   public convertCategories(
     this: BaseArticleConverter,
     categories: string[] | undefined,
-    _html: string
+    _html: string,
+    _head: string
   ): string[] {
     return categories ?? []
   }
 
-  public isPaywalled(this: BaseArticleConverter, _html: string) {
+  public isShort(
+    this: BaseArticleConverter,
+    _html: string,
+    _head: string
+  ): boolean {
+    return false
+  }
+
+  public isPaywalled(this: BaseArticleConverter, _html: string, _head: string) {
     return false
   }
 

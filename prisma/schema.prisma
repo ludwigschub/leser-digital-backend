@@ -65,21 +65,23 @@ model Editor {
 }
 
 model Article {
-  id              Int               @id @default(autoincrement())
-  title           String
-  description     String?
-  content         String?
-  url             String
-  image           String?
-  categories      String[]
-  premium         Boolean           @default(false)
-  sourceId        Int
-  source          Source            @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  editors         Editor[]
-  uploadedAt      DateTime
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  activity ArticleActivity[]
+  id          Int               @id @default(autoincrement())
+  title       String
+  description String?
+  content     String?
+  url         String
+  image       String?
+  categories  String[]
+  premium     Boolean           @default(false)
+  recommended Boolean           @default(false)
+  short       Boolean           @default(false)
+  sourceId    Int
+  source      Source            @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  editors     Editor[]
+  uploadedAt  DateTime
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  activity    ArticleActivity[]
 }
 
 enum ArticleActivityType {

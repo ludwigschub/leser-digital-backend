@@ -14,9 +14,10 @@ export const articleQueries = extendType({
         const filter = {
           source: source ? { key: source } : undefined,
           editors: editor ? { some: { name: editor } } : undefined,
+          short: false,
         }
         return await prisma.article.findMany({
-          where: args.filter ? filter : undefined,
+          where: filter,
           include: {
             source: { include: { editors: false } },
             editors: { include: { source: false } },
@@ -79,6 +80,44 @@ export const articleQueries = extendType({
             activity: [activity],
           }
         })
+      },
+    })
+    t.list.field("recommendedArticles", {
+      type: "Article",
+      resolve: async (_parent, _args, { prisma }: Context) => {
+        return prisma.article.findMany({
+          where: {
+            recommended: true,
+          },
+          orderBy: {
+            uploadedAt: "desc",
+          },
+          include: {
+            source: { include: { editors: false } },
+          },
+          take: 3,
+        })
+      },
+    })
+    t.list.field("mostViewedArticles", {
+      type: "Article",
+      resolve: async (_parent, _args, { prisma }: Context) => {
+        const mostViewed = await prisma.article.findMany({
+          include: {
+            _count: {
+              select: {
+                activity: { where: { type: ArticleActivityType.VIEW_ARTICLE } },
+              },
+            },
+          },
+          orderBy: {
+            activity: {
+              _count: "desc"
+            }
+          }
+        })
+
+        return mostViewed
       },
     })
   },

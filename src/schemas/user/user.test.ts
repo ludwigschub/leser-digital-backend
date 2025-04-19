@@ -12,7 +12,7 @@ const sleep = (time: number) => {
   )
 }
 
-describe("Integration Test for auth methods", () => {
+describe("Integration test for user methods", () => {
   const loggedInQuery = `
     query loggedIn {
       loggedIn {

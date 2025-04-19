@@ -49,9 +49,9 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
           }
           if (!dry && article) {
             const editors = await Promise.all(
-              article.creators.map((creator) =>
+              article.creators?.map((creator) =>
                 getOrCreateEditor(creator, source)
-              )
+              ) ?? []
             )
             const newArticleInput = {
               title: article.title,
@@ -61,6 +61,7 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
               description: article.description,
               image: article.image,
               premium: article.premium,
+              short: article.short,
               source: { connect: { key } },
               editors: {
                 connect: editors.map((editor) => ({
@@ -96,12 +97,6 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
 
 ;(async () => {
   const argv = await yargs(hideBin(process.argv))
-    .option("generate", {
-      alias: "g",
-      type: "boolean",
-      description: "Generate article files",
-      default: false,
-    })
     .option("feed", {
       alias: "f",
       type: "string",

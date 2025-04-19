@@ -1,3 +1,4 @@
+import { JSDOM } from "jsdom"
 import { BaseArticleConverter } from "./BaseArticleConverter"
 
 export class SpiegelArticleConverter extends BaseArticleConverter {
@@ -11,14 +12,31 @@ export class SpiegelArticleConverter extends BaseArticleConverter {
 
   public convertCreators(
     this: BaseArticleConverter,
-    creator: string | undefined,
-    _html: string
+    _creator: string | undefined,
+    _html: string,
+    head: string
   ): string[] {
-    if (!creator) {
-      return [this.source.name]
-    } else {
-      return [creator]
+    const dom = JSDOM.fragment(head)
+    const author = dom.querySelector("meta[name='author']")
+    const authorNames = author
+      ?.getAttribute("content")
+      ?.split(",")
+      .filter((name) => name.trim() !== "DER SPIEGEL")
+    if (authorNames) {
+      return [...authorNames, this.source.name]
     }
+    return [this.source.name]
+  }
+
+  public isShort(
+    this: BaseArticleConverter,
+    _html: string,
+    _head: string
+  ): boolean {
+    return (
+      this.article.creators?.length === 1 &&
+      this.article.creators[0] === this.source.name
+    )
   }
 
   public isPaywalled(this: SpiegelArticleConverter, html: string) {

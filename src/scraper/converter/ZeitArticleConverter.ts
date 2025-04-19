@@ -38,6 +38,14 @@ export class ZeitArticleConverter extends BaseArticleConverter {
     return [this.source.name]
   }
 
+  public isShort(this: BaseArticleConverter, html: string): boolean {
+    const dom = JSDOM.fragment(html)
+    const isDpa = dom
+      .querySelector("p.article-notice__text")
+      ?.innerHTML.includes("automatisch von der Deutschen Presse-Agentur")
+    return !!isDpa
+  }
+
   public isPaywalled(this: ZeitArticleConverter, html: string) {
     const dom = JSDOM.fragment(html)
     const paywall = dom.querySelector("aside#paywall")

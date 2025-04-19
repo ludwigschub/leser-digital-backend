@@ -1,9 +1,11 @@
+import { Prisma } from "@prisma/client"
+
 import prisma from "../../src/prismaClient"
 
 const ZEIT_RSS_FEED = "https://newsfeed.zeit.de/index"
 const SPIEGEL_RSS_FEED = "https://www.spiegel.de/schlagzeilen/index.rss"
 
-const getSources = async () => [
+const getSources = (): Prisma.SourceCreateInput[] => [
   {
     key: "zeit",
     name: "ZEIT ONLINE",
@@ -19,10 +21,10 @@ const getSources = async () => [
 ]
 
 export const seedSources = async () => {
-  const sources = await getSources()
-  await Promise.all(
-    sources.map(async (source) => {
-      await prisma.source.create({ data: source })
+  const sources = getSources()
+  return await Promise.all(
+    sources.map((source) => {
+      return prisma.source.create({ data: source })
     })
   )
 }
