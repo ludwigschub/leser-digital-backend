@@ -1,7 +1,7 @@
 # Leser Digital Backend
 Express application using TypeScript, [Prisma](https://www.prisma.io/), [GraphQL](https://graphql.org/), [Nexus](https://nexusjs.org/) and [Postgres](https://www.postgresql.org/)
 
-✅ **100% Test Coverage**
+![coverage](./badges/coverage.svg)
 
 ## Installation
 
