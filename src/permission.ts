@@ -6,6 +6,7 @@ import {
   articleActivityMutations,
   articleActivityQueries,
 } from "./schemas/articleActivity/articleActivity.permissions"
+import { sourceQueryRules } from "./schemas/source/source.permissions"
 import {
   userMutationRules,
   userQueryRules,
@@ -19,6 +20,7 @@ export const permissions = shield(
       ...userQueryRules,
       ...articleQueryRules,
       ...articleActivityQueries,
+      ...sourceQueryRules,
     },
     Mutation: {
       "*": deny,
