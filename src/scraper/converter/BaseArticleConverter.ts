@@ -1,9 +1,10 @@
-import { Source } from "@prisma/client"
+import { ArticleCategory, Source } from "@prisma/client"
 import axios from "axios"
 import { toKebabCase } from "js-convert-case"
 import { JSDOM } from "jsdom"
 import RssParser from "rss-parser"
 import TurndownService from "turndown"
+import { classifyText } from "../openai"
 
 interface ConvertedArticle {
   title: string
@@ -12,7 +13,7 @@ interface ConvertedArticle {
   uploadedAt: Date
   url: string
   creators: string[]
-  categories: string[]
+  category: ArticleCategory
   image?: string
   premium?: boolean
   short?: boolean
@@ -43,14 +44,16 @@ export class BaseArticleConverter {
         pubDate,
         creator,
         enclosure,
-        categories: rawCategories,
       } = this.item
       if (!rawTitle || !url || !pubDate) {
         console.log("❌ Missing title or link. Skipping...")
         return
       }
-      const response = await axios.get(url)
-      const dom = new JSDOM(response.data)
+      const response = await axios.get(url).catch(() => {
+        console.error("❌ Error fetching article...")
+        return undefined
+      })
+      const dom = new JSDOM(response?.data)
       const head = dom.window.document.head.innerHTML
       const html = dom.window.document.body.innerHTML
 
@@ -73,7 +76,7 @@ export class BaseArticleConverter {
 
       this.article.creators = this.convertCreators(creator, html, head)
 
-      this.article.categories = this.convertCategories(rawCategories, html, head)
+      this.article.category = await this.convertCategory(html, head)
 
       this.article.short = this.isShort(html, head)
 
@@ -134,13 +137,27 @@ export class BaseArticleConverter {
     }
   }
 
-  public convertCategories(
+  public async convertCategory(
     this: BaseArticleConverter,
-    categories: string[] | undefined,
     _html: string,
     _head: string
-  ): string[] {
-    return categories ?? []
+  ): Promise<ArticleCategory> {
+    const categories = [
+      ...Object.keys(ArticleCategory).map((category) => category),
+    ]
+    const category = await classifyText(
+      this.article.title as string,
+      this.article.description as string,
+      categories
+    )
+    if (category && categories.find((c) => c === category)) {
+      return category as ArticleCategory
+    } else {
+      console.debug(
+        `❌ Unknown category "${category}"`
+      )
+      return ArticleCategory.UNKNOWN
+    }
   }
 
   public isShort(

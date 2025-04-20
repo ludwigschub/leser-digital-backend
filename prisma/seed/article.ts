@@ -1,4 +1,4 @@
-import { Prisma, Source } from "@prisma/client"
+import { ArticleCategory, Prisma, Source } from "@prisma/client"
 
 import prisma from "../../src/prismaClient"
 
@@ -10,6 +10,7 @@ export const getArticles = (source: Source): Prisma.ArticleCreateInput[] => [
     image: "https://picsum.photos/1000",
     uploadedAt: new Date(),
     source: { connect: { id: source.id } },
+    category: ArticleCategory.ENTERTAINMENT,
   },
   {
     title: "Example Article 2",
@@ -18,6 +19,7 @@ export const getArticles = (source: Source): Prisma.ArticleCreateInput[] => [
     image: "https://picsum.photos/1000",
     uploadedAt: new Date(),
     source: { connect: { id: source.id } },
+    category: ArticleCategory.ENTERTAINMENT,
   },
   {
     title: "Example Article 3",
@@ -26,6 +28,7 @@ export const getArticles = (source: Source): Prisma.ArticleCreateInput[] => [
     image: "https://picsum.photos/1000",
     uploadedAt: new Date(),
     source: { connect: { id: source.id } },
+    category: ArticleCategory.ENTERTAINMENT,
   },
 ]
 

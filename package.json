@@ -50,6 +50,8 @@
     "jsonwebtoken": "^9.0.2",
     "mailgun.js": "^12.0.1",
     "node-schedule": "^2.1.1",
+    "openai": "^4.95.1",
+    "p-queue-cjs": "^7.3.4",
     "rss-parser": "^3.13.0",
     "turndown": "^7.2.0",
     "yargs": "^17.7.2"

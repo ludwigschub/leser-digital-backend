@@ -1,5 +1,8 @@
-import { inputObjectType, nullable, objectType } from "nexus"
-import { Article as ArticleType } from "nexus-prisma"
+import { enumType, inputObjectType, nullable, objectType } from "nexus"
+import {
+  ArticleCategory as ArticleCategoryType,
+  Article as ArticleType,
+} from "nexus-prisma"
 
 export const Article = objectType({
   name: ArticleType.$name,
@@ -12,7 +15,7 @@ export const Article = objectType({
     t.field(ArticleType.url)
     t.field(ArticleType.image)
     t.field(ArticleType.premium)
-    t.field(ArticleType.categories)
+    t.field(ArticleType.category)
     t.field(ArticleType.source)
     t.field(ArticleType.editors)
     t.field(ArticleType.uploadedAt)
@@ -30,6 +33,12 @@ export const Article = objectType({
       },
     })
   },
+})
+
+export const ArticleCategory = enumType({
+  name: ArticleCategoryType.name,
+  description: ArticleCategoryType.description,
+  members: ArticleCategoryType.members,
 })
 
 export const articleQueryFilter = inputObjectType({

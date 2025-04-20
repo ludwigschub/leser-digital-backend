@@ -43,7 +43,7 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
           const article = await articleConverter.convertArticle()
           if (debug && article) {
             console.debug(`📝 Article: ${article.title} (${article.url})`)
-            console.debug(`🗃️ Categories: ${article.categories}`)
+            console.debug(`🗃️ Category: ${article.category}`)
             console.debug(`⏰ Published: ${article.uploadedAt}`)
             console.debug(`✍️ Creator: ${article.creators}`)
           }
@@ -57,7 +57,7 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
               title: article.title,
               url: article.url,
               uploadedAt: article.uploadedAt,
-              categories: article.categories,
+              category: article.category,
               description: article.description,
               image: article.image,
               premium: article.premium,
@@ -90,6 +90,8 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
         })
       ).then(() => {
         console.log(`✅ Articles from ${key} converted successfully!`)
+      }).catch((error) => {
+        console.error(`❌ Error converting articles from ${key}:`, error)
       })
     })
   })

@@ -1,4 +1,5 @@
 import { JSDOM } from "jsdom"
+
 import { BaseArticleConverter } from "./BaseArticleConverter"
 
 export class SpiegelArticleConverter extends BaseArticleConverter {

@@ -71,7 +71,7 @@ model Article {
   content     String?
   url         String
   image       String?
-  categories  String[]
+  category    ArticleCategory
   premium     Boolean           @default(false)
   recommended Boolean           @default(false)
   short       Boolean           @default(false)
@@ -82,6 +82,31 @@ model Article {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   activity    ArticleActivity[]
+}
+
+enum ArticleCategory {
+  TECHNOLOGY
+  SCIENCE
+  HEALTH
+  BUSINESS
+  ENTERTAINMENT
+  SPORTS
+  POLITICS
+  CULTURE
+  ENVIRONMENT
+  RELIGION
+  EDUCATION
+  BREAKING
+  GAMING
+  TRAVEL
+  ART
+  PSYCHOLOGY
+  HISTORY
+  FOOD
+  FASHION
+  PUZZLE
+  WEATHER
+  UNKNOWN
 }
 
 enum ArticleActivityType {
