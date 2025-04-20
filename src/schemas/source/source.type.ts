@@ -1,5 +1,6 @@
 import { objectType } from "nexus"
 import { Source as SourceType } from "nexus-prisma"
+import { Context } from "../../context"
 
 export const Source = objectType({
   name: SourceType.$name,
@@ -14,5 +15,13 @@ export const Source = objectType({
     t.field(SourceType.updatedAt)
     t.field(SourceType.articles)
     t.field(SourceType.editors)
+    t.field("articleCount", {
+      type: "Int",
+      resolve: async (parent, _arg, { prisma }: Context) => {
+        return await prisma.article.count({
+          where: { source: { id: parent.id } },
+        })
+      },
+    })
   },
 })
