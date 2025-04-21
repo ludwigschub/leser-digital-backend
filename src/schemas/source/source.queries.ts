@@ -3,7 +3,7 @@ import { extendType } from "nexus"
 export const sourceQueries = extendType({
   type: "Query",
   definition(t) {
-    t.list.field("sources", {
+    t.list.nonNull.field("sources", {
       type: "Source",
       resolve: async (_parent, _args, { prisma }) => {
         return await prisma.source.findMany()

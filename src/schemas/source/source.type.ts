@@ -1,5 +1,6 @@
 import { objectType } from "nexus"
 import { Source as SourceType } from "nexus-prisma"
+
 import { Context } from "../../context"
 
 export const Source = objectType({
@@ -10,7 +11,7 @@ export const Source = objectType({
     t.field(SourceType.name)
     t.field(SourceType.key)
     t.field(SourceType.logo)
-    t.field(SourceType.feedUrl)
+    t.field(SourceType.banner)
     t.field(SourceType.createdAt)
     t.field(SourceType.updatedAt)
     t.field(SourceType.articles)

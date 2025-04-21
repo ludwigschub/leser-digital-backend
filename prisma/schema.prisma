@@ -47,7 +47,8 @@ model Source {
   key       String    @unique
   name      String
   logo      String
-  feedUrl   String
+  banner    String
+  feeds     String[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   articles  Article[]
