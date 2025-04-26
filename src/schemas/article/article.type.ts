@@ -46,5 +46,6 @@ export const articleQueryFilter = inputObjectType({
   definition(t) {
     t.string("source")
     t.string("editor")
+    t.string("category")
   },
 })

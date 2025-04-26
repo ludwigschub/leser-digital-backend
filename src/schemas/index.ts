@@ -5,4 +5,5 @@ export * from "./article"
 export * from "./articleActivity"
 export * from "./editor"
 export * from "./source"
+export * from "./subscription"
 

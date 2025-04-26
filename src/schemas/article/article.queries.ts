@@ -1,7 +1,46 @@
-import { ArticleActivityType } from "@prisma/client"
+import {
+  ArticleActivityType,
+  ArticleCategory,
+  Prisma,
+  Subscription,
+} from "@prisma/client"
 import { extendType, nullable } from "nexus"
 
 import { Context } from "../../context"
+
+const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
+  return {
+    OR: [
+      {
+        source: {
+          id: {
+            in: subscriptions
+              .map((s) => s.sourceId)
+              .filter((s) => Boolean(s)) as number[],
+          },
+        },
+      },
+      {
+        editors: {
+          some: {
+            id: {
+              in: subscriptions
+                .map((s) => s.sourceId)
+                .filter((s) => Boolean(s)) as number[],
+            },
+          },
+        },
+      },
+      {
+        category: {
+          in: subscriptions
+            .map((s) => s.category)
+            .filter((s) => Boolean(s)) as ArticleCategory[],
+        },
+      },
+    ],
+  }
+}
 
 export const articleQueries = extendType({
   type: "Query",
@@ -9,23 +48,41 @@ export const articleQueries = extendType({
     t.list.nonNull.field("articles", {
       type: "Article",
       args: { filter: nullable("ArticleQueryFilter") },
-      resolve: async (_parent, args, { prisma }: Context) => {
-        const { source, editor } = args.filter ?? {}
-        const filter = {
-          source: source ? { key: source } : undefined,
-          editors: editor ? { some: { name: editor } } : undefined,
-          short: false,
+      resolve: async (_parent, args, { prisma, user }: Context) => {
+        if (user) {
+          const userSubscriptions = await prisma.subscription.findMany({
+            where: { userId: user.id },
+          })
+          if (userSubscriptions.length > 0) {
+            return await prisma.article.findMany({
+              where: getArticleSubscriptionsFilter(userSubscriptions),
+              include: {
+                source: { include: { editors: false } },
+                editors: { include: { source: false } },
+              },
+              orderBy: {
+                uploadedAt: "desc",
+              },
+            })
+          }
+          const { source, editor, category } = args.filter ?? {}
+          const filter = {
+            source: source ? { key: source } : undefined,
+            editors: editor ? { some: { name: editor } } : undefined,
+            category: category ? { equals: category } : null,
+            short: false,
+          } as Prisma.ArticleWhereInput
+          return await prisma.article.findMany({
+            where: filter,
+            include: {
+              source: { include: { editors: false } },
+              editors: { include: { source: false } },
+            },
+            orderBy: {
+              uploadedAt: "desc",
+            },
+          })
         }
-        return await prisma.article.findMany({
-          where: filter,
-          include: {
-            source: { include: { editors: false } },
-            editors: { include: { source: false } },
-          },
-          orderBy: {
-            uploadedAt: "desc",
-          },
-        })
       },
     })
     t.list.nonNull.field("savedArticles", {
@@ -33,6 +90,10 @@ export const articleQueries = extendType({
       args: { source: nullable("String") },
       resolve: async (_parent, args, { prisma, user }: Context) => {
         const { source } = args ?? {}
+
+        if (!user) {
+          return []
+        }
 
         const activity = await prisma.articleActivity.findMany({
           where: {
@@ -60,6 +121,10 @@ export const articleQueries = extendType({
       type: "Article",
       args: { source: nullable("String") },
       resolve: async (_parent, { source }, { prisma, user }: Context) => {
+        if (!user) {
+          return []
+        }
+
         const activity = await prisma.articleActivity.findMany({
           where: {
             userId: user?.id,
@@ -112,9 +177,9 @@ export const articleQueries = extendType({
           },
           orderBy: {
             activity: {
-              _count: "desc"
-            }
-          }
+              _count: "desc",
+            },
+          },
         })
 
         return mostViewed

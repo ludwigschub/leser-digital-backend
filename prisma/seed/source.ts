@@ -6,8 +6,10 @@ import {
   HANDELSBLATT_RSS_FEEDS,
   MANAGER_RSS_FEEDS,
   SPIEGEL_RSS_FEEDS,
+  SPORTSCHAU_RSS_FEEDS,
   T3N_RSS_FEEDS,
   TAGESSCHAU_RSS_FEEDS,
+  TECHCRUNCH_RSS_FEEDS,
   ZEIT_RSS_FEEDS,
 } from "./rss-feeds"
 
@@ -26,7 +28,7 @@ const getSources = (): Prisma.SourceCreateInput[] => [
     logo: "https://upload.wikimedia.org/wikipedia/commons/4/4f/Spiegel-Online-Logo.svg",
     feeds: SPIEGEL_RSS_FEEDS,
     banner:
-      "https://cdn.prod.www.spiegel.de/images/25ed4237-883e-4355-9382-094df84efec7_w976_r1_fpx47.2_fpy49.98.webp",
+      "https://cdn.prod.www.spiegel.de/images/e25af6a8-edb3-4a58-b98c-8af73a7ae51d_w520_r0.93_fpx49_fpy50.jpg",
   },
   {
     key: "manager",
@@ -49,7 +51,7 @@ const getSources = (): Prisma.SourceCreateInput[] => [
   {
     key: "t3n",
     name: "T3N Magazin",
-    logo: "https://companieslogo.com/img/orig/t3n-de_BIG-9336963e.svg",
+    logo: "https://companieslogo.com/img/orig/t3n-de-ee06da85.svg",
     feeds: T3N_RSS_FEEDS,
     banner:
       "https://images.t3n.de/news/wp-content/uploads/2025/02/calm-technology.jpg?class=hero",
@@ -62,13 +64,30 @@ const getSources = (): Prisma.SourceCreateInput[] => [
     banner:
       "https://images.handelsblatt.com/wDgf21980cZx/cover/1600/1067/200/200/0/0/0.5/0.5/dax-sentiment.avif",
   },
+  {
+    key: "sportschau",
+    name: "Sportschau",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/6/67/Sportschau_2009.svg",
+    feeds: SPORTSCHAU_RSS_FEEDS,
+    banner:
+      // eslint-disable-next-line max-len
+      "https://images.sportschau.de/image/7c3d9c4e-75fd-43a5-b088-e5bf397c5083/AAABlmceYoI/AAABkZLpihI/20x9-1280/thomas-mueller-396.webp",
+  },
+  {
+    key: "techcrunch",
+    name: "TechCrunch",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/b/b9/TechCrunch_logo.svg",
+    feeds: TECHCRUNCH_RSS_FEEDS,
+    banner:
+      "https://techcrunch.com/wp-content/uploads/2023/09/53204393660_7e9d0c9a0d_k.jpg",
+  },
 ]
 
 export const seedSources = async () => {
   const sources = getSources()
   return await Promise.all(
-    sources.map((source) => {
-      return prisma.source.create({ data: source })
+    sources.map((source, index) => {
+      return prisma.source.create({ data: { ...source, id: index } })
     })
   )
 }

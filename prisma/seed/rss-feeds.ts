@@ -20,3 +20,5 @@ export const HANDELSBLATT_RSS_FEEDS = [
   "https://www.handelsblatt.com/contentexport/feed/research-institut",
   "https://www.handelsblatt.com/contentexport/feed/video",
 ]
+export const SPORTSCHAU_RSS_FEEDS = ["https://www.sportschau.de/index~rss2.xml"]
+export const TECHCRUNCH_RSS_FEEDS = ["https://techcrunch.com/feed/"]

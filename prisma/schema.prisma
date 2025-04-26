@@ -27,6 +27,7 @@ model User {
   accessToken        String?
   refreshToken       String[]          @default([])
   articleActivity    ArticleActivity[]
+  subscriptions      Subscription[]
 }
 
 model VerificationCode {
@@ -43,26 +44,41 @@ enum Role {
 }
 
 model Source {
-  id        Int       @id @default(autoincrement())
-  key       String    @unique
-  name      String
-  logo      String
-  banner    String
-  feeds     String[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  articles  Article[]
-  editors   Editor[]
+  id          Int            @id @default(autoincrement())
+  key         String         @unique
+  name        String
+  logo        String
+  banner      String
+  feeds       String[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  articles    Article[]
+  editors     Editor[]
+  subscribers Subscription[]
 }
 
 model Editor {
-  id        Int       @id @default(autoincrement())
-  name      String
-  sourceId  Int
-  source    Source    @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  articles  Article[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          Int            @id @default(autoincrement())
+  name        String
+  sourceId    Int
+  source      Source         @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  articles    Article[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  subscribers Subscription[]
+}
+
+model Subscription {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceId  Int?
+  source    Source?          @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  category  ArticleCategory?
+  editorId  Int?
+  editor    Editor?          @relation(fields: [editorId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 }
 
 model Article {
@@ -98,15 +114,23 @@ enum ArticleCategory {
   RELIGION
   EDUCATION
   BREAKING
+  CRIME
   GAMING
   TRAVEL
   ART
   PSYCHOLOGY
   HISTORY
   FOOD
+  FITNESS
   FASHION
   PUZZLE
   WEATHER
+  MUSIC
+  MOVIES
+  ANIMALS
+  NATURE
+  PHILOSOPHY
+  LITERATURE
   UNKNOWN
 }
 
