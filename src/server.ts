@@ -5,7 +5,7 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { applyMiddleware } from "graphql-middleware";
 
 import { Context } from "./context";
-import { permissions } from "./permission";
+import { permissions } from "./permissions";
 import schema from "./schema";
 
 // Initialize GraphQL server

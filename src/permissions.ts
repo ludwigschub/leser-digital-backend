@@ -3,10 +3,11 @@ import { deny, shield } from "graphql-shield"
 import { rules } from "./rules"
 import { articleQueryRules } from "./schemas/article/article.permissions"
 import {
-  articleActivityMutations,
-  articleActivityQueries,
+  articleActivityMutationRules,
+  articleActivityQueryRules,
 } from "./schemas/articleActivity/articleActivity.permissions"
 import { sourceQueryRules } from "./schemas/source/source.permissions"
+import { subscriptionMutationRules, subscriptionQueryRules } from "./schemas/subscription/subscription.permission"
 import {
   userMutationRules,
   userQueryRules,
@@ -19,14 +20,16 @@ export const permissions = shield(
       "*": rules.isAuthenticated,
       ...userQueryRules,
       ...articleQueryRules,
-      ...articleActivityQueries,
+      ...articleActivityQueryRules,
       ...sourceQueryRules,
+      ...subscriptionQueryRules,
     },
     Mutation: {
       "*": deny,
       ...userMutationRules,
       ...verificationCodeMutationRules,
-      ...articleActivityMutations,
+      ...articleActivityMutationRules,
+      ...subscriptionMutationRules
     },
   },
   { allowExternalErrors: true }

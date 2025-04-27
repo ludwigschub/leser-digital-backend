@@ -1,7 +1,7 @@
 import { ExecutionResult, graphql } from "graphql"
 import { applyMiddleware } from "graphql-middleware"
 
-import { permissions } from "../src/permission"
+import { permissions } from "../src/permissions"
 import prisma from "../src/prismaClient"
 import schema from "../src/schema"
 

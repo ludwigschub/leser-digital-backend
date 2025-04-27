@@ -1,10 +1,10 @@
 import { rules } from "../../rules"
 
-export const articleActivityQueries = {
+export const articleActivityQueryRules = {
   articleActivity: rules.isAuthenticated,
 }
 
-export const articleActivityMutations = {
+export const articleActivityMutationRules = {
   createArticleActivity: rules.isAuthenticated,
   deleteArticleActivity: rules.isAuthenticated,
 }

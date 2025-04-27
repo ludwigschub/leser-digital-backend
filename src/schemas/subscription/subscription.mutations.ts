@@ -21,14 +21,24 @@ export const SubscriptionMutations = extendType({
         if (!user) {
           throw UserNotLoggedInError
         }
-        if (!sourceId && !editorId && !category) {
+        if (
+          (sourceId === null || sourceId === undefined) &&
+          (editorId === null || editorId === undefined) &&
+          !category
+        ) {
           throw new Error("At least one argument is required")
         }
         return await prisma.subscription.create({
           data: {
             user: { connect: { id: user.id } },
-            source: sourceId ? { connect: { id: sourceId } } : undefined,
-            editor: editorId ? { connect: { id: editorId } } : undefined,
+            source:
+              sourceId !== null && sourceId !== undefined
+                ? { connect: { id: sourceId } }
+                : undefined,
+            editor:
+              editorId !== null && editorId !== undefined
+                ? { connect: { id: editorId } }
+                : undefined,
             category,
           },
         })
