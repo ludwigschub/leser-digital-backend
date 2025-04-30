@@ -12,4 +12,26 @@ spec:
             - name: scraper
               image: {{ .Values.cronjob.image }}
               command: ["yarn", "scraper"]
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.api.env.databaseSecret.name }}
+                      key: {{ .Values.api.env.databaseSecret.key }}
+                - name: MAILGUN_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.api.env.mailgunSecret.name }}
+                      key: {{ .Values.api.env.mailgunSecret.key }}
+                - name: MAILGUN_DOMAIN
+                  value: {{ .Values.api.env.mailgunDomain }}
+                - name: MAILGUN_SENDER_EMAIL
+                  value: {{ .Values.api.env.mailgunSenderEmail }}
+                - name: OPENAI_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.api.env.openAiSecret.name }}
+                      key: {{ .Values.api.env.openAiSecret.key }}
+                - name: NODE_ENV
+                  value: production
           restartPolicy: OnFailure

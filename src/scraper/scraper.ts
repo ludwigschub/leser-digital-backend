@@ -1,5 +1,4 @@
 import { Source } from "@prisma/client"
-import { scheduleJob } from "node-schedule"
 import RssParser from "rss-parser"
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
@@ -115,12 +114,6 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
       description: "Show debug output",
       default: false,
     })
-    .option("schedule", {
-      alias: "s",
-      type: "string",
-      description: "Run scraper on a schedule",
-      default: undefined,
-    })
     .option("dry", {
       type: "boolean",
       description: "Run scraper in dry run mode",
@@ -128,14 +121,5 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
     })
     .help().argv
 
-  const job = () => scrape(argv.feed, argv.debug, argv.dry)
-
-  if (!argv.schedule) {
-    job()
-  } else {
-    scheduleJob(argv.schedule, () => {
-      console.log("⏰ Running scraper...")
-      job()
-    })
-  }
+  scrape(argv.feed, argv.debug, argv.dry)
 })()
