@@ -12,16 +12,38 @@ spec:
       labels:
         app: api
     spec:
-      imagePullSecrets:
-        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      imagePullSecrets: { { - toYaml .Values.imagePullSecrets | nindent 8 } }
       containers:
         - name: api
-          image: {{ .Values.api.image }}
+          image: { { .Values.api.image } }
           ports:
-            - containerPort: {{ .Values.api.servicePort }}
+            - containerPort: { { .Values.api.servicePort } }
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.api.env.databaseSecret.name }}
-                  key: {{ .Values.api.env.databaseSecret.key }}
+                  name: { { .Values.api.env.databaseSecret.name } }
+                  key: { { .Values.api.env.databaseSecret.key } }
+            - name: FRONTEND_URL
+              value: { { .Values.frontendUrl } }
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: { { .Values.api.env.jwtSecret.name } }
+                  key: { { .Values.api.env.jwtSecret.key } }
+            - name: MAILGUN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: { { .Values.api.env.mailgunSecret.name } }
+                  key: { { .Values.api.env.mailgunSecret.key } }
+            - name: MAILGUN_DOMAIN
+              value: { { .Values.api.env.mailgunDomain } }
+            - name: MAILGUN_SENDER_EMAIL
+              value: { { .Values.api.env.mailgunSenderEmail } }
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: { { .Values.api.env.openAiSecret.name } }
+                  key: { { .Values.api.env.openAiSecret.key } }
+            - name: NODE_ENV
+              value: production

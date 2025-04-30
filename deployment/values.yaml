@@ -1,10 +1,22 @@
 api:
   image: ghcr.io/ludwigschub/leser-digital-backend:latest
   servicePort: 4000
+  frontendUrl: https://leser.digital
   env:
     databaseSecret:
       name: db-credentials
       key: DATABASE_URL
+    jwtSecret:
+      name: jwt-secret
+      key: JWT_SECRET
+    mailgunSecret:
+      name: mailgun-credentials
+      key: MAILGUN_API_KEY
+    mailgunDomain: mail.leser.digital
+    mailgunSenderEmail: no-reply@leser.digital
+    openAiSecret:
+      name: openai-credentials
+      key: OPENAI_API_KEY
 
 cronjob:
   image: ghcr.io/ludwigschub/leser-digital-backend:latest
@@ -14,7 +26,7 @@ ingress:
   host: api.leser.digital
   tls:
     enabled: true
-    secretName: leser-digital-tls
+    secretName: api-leser-digital-tls
 
 imagePullSecrets:
   - name: ghcr-secret

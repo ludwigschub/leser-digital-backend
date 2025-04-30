@@ -40,3 +40,7 @@ jobs:
           RELEASE_NAME: leser-digital-backend-prod
         run: |
           bash deployment/scripts/deploy.sh
+      # Trigger frontend redeployment on DigitalOcean App Platform
+      - name: Trigger Frontend Redeployment
+        run: |
+          doctl apps deploy <frontend-app-id>
