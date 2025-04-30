@@ -16,7 +16,7 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
           id: {
             in: subscriptions
               .map((s) => s.sourceId)
-              .filter((s) => Boolean(s)) as number[],
+              .filter((id) => id !== null && id !== undefined) as number[],
           },
         },
       },
@@ -25,8 +25,8 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
           some: {
             id: {
               in: subscriptions
-                .map((s) => s.sourceId)
-                .filter((s) => Boolean(s)) as number[],
+                .map((s) => s.editorId)
+                .filter((id) => id !== null && id !== undefined) as number[],
             },
           },
         },
@@ -35,7 +35,7 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
         category: {
           in: subscriptions
             .map((s) => s.category)
-            .filter((s) => Boolean(s)) as ArticleCategory[],
+            .filter((category) => Boolean(category)) as ArticleCategory[],
         },
       },
     ],
@@ -55,7 +55,10 @@ export const articleQueries = extendType({
           })
           if (userSubscriptions.length > 0) {
             return await prisma.article.findMany({
-              where: getArticleSubscriptionsFilter(userSubscriptions),
+              where: {
+                ...getArticleSubscriptionsFilter(userSubscriptions),
+                short: false,
+              },
               include: {
                 source: { include: { editors: false } },
                 editors: { include: { source: false } },
