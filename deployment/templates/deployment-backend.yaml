@@ -25,7 +25,7 @@ spec:
                   name: {{ .Values.api.env.databaseSecret.name }}
                   key: {{ .Values.api.env.databaseSecret.key }}
             - name: FRONTEND_URL
-              value: {{ .Values.frontendUrl }}
+              value: {{ .Values.api.env.frontendUrl }}
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:

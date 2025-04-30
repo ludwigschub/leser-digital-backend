@@ -1,8 +1,8 @@
 api:
   image: ghcr.io/ludwigschub/leser-digital-backend:latest
   servicePort: 4000
-  frontendUrl: https://leser.digital
   env:
+    frontendUrl: https://leser.digital
     databaseSecret:
       name: db-credentials
       key: DATABASE_URL
