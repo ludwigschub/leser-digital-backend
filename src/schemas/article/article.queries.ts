@@ -68,24 +68,24 @@ export const articleQueries = extendType({
               },
             })
           }
-          const { source, editor, category } = args.filter ?? {}
-          const filter = {
-            source: source ? { key: source } : undefined,
-            editors: editor ? { some: { name: editor } } : undefined,
-            category: category ? { equals: category } : null,
-            short: false,
-          } as Prisma.ArticleWhereInput
-          return await prisma.article.findMany({
-            where: filter,
-            include: {
-              source: { include: { editors: false } },
-              editors: { include: { source: false } },
-            },
-            orderBy: {
-              uploadedAt: "desc",
-            },
-          })
         }
+        const { source, editor, category } = args.filter ?? {}
+        const filter = {
+          source: source ? { key: source } : undefined,
+          editors: editor ? { some: { name: editor } } : undefined,
+          category: category ? { equals: category } : null,
+          short: false,
+        } as Prisma.ArticleWhereInput
+        return await prisma.article.findMany({
+          where: filter,
+          include: {
+            source: { include: { editors: false } },
+            editors: { include: { source: false } },
+          },
+          orderBy: {
+            uploadedAt: "desc",
+          },
+        })
       },
     })
     t.list.nonNull.field("savedArticles", {
