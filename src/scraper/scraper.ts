@@ -33,11 +33,11 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
       return
     }
 
-    if(!(key in Object.keys(converters))) {
+    if(!(key in converters)) {
       console.error(`❌ No converter found for source ${key}.`)
       return
     }
-    
+
     console.log(`📖 Converting articles from ${name}...`)
     const converter = converters[key]
     feeds.forEach(async (feedUrl) => {
