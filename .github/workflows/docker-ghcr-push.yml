@@ -1,9 +1,10 @@
 name: Build and Push to GHCR
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Integration testing with PostgreSQL"]
+    types:
+      - completed
 
 jobs:
   build-and-push:

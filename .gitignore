@@ -4,3 +4,4 @@ dist
 generated
 .env
 yarn-error.log
+debug.log
