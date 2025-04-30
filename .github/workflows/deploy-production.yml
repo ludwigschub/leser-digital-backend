@@ -43,4 +43,4 @@ jobs:
       # Trigger frontend redeployment on DigitalOcean App Platform
       - name: Trigger Frontend Redeployment
         run: |
-          doctl apps deploy 50ff4c4f-20b1-4ae2-a4ba-76fce223f86a
+          doctl apps create-deployment 50ff4c4f-20b1-4ae2-a4ba-76fce223f86a
