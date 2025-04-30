@@ -4,6 +4,7 @@ metadata:
   name: data-scraper
 spec:
   schedule: "{{ .Values.cronjob.schedule }}"
+  successfulJobsHistoryLimit: 3
   jobTemplate:
     spec:
       template:
