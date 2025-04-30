@@ -26,8 +26,7 @@ server.start().then(async () => {
     cors<cors.CorsRequest>({
       allowedHeaders: ["Authorization", "Content-Type"],
       credentials: true,
-      origin:
-        app.settings.env === "development" ? process.env.FRONTEND_URL : "*",
+      origin: process.env.FRONTEND_URL,
     })
   )
 
