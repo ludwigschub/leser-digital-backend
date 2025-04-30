@@ -1,0 +1,4 @@
+apiVersion: v2
+name: leser-digital-backend
+description: A Helm chart for deploying a full-stack app with React frontend, Node.js backend, and a data scraping cronjob.
+version: 0.1.0

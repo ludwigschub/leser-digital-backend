@@ -1,0 +1,20 @@
+api:
+  image: ghcr.io/ludwigschub/leser-digital-backend:latest
+  servicePort: 4000
+  env:
+    databaseSecret:
+      name: db-credentials
+      key: DATABASE_URL
+
+cronjob:
+  image: ghcr.io/ludwigschub/leser-digital-backend:latest
+  schedule: "5 * * * *"
+
+ingress:
+  host: api.leser.digital
+  tls:
+    enabled: true
+    secretName: leser-digital-tls
+
+imagePullSecrets:
+  - name: ghcr-secret

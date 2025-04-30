@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "build": "tsc",
     "test": "jest",
+    "deploy": "bash deployment/scripts/deploy.sh",
     "db:seed": "ts-node prisma/seed.ts",
     "db:flush": "prisma db push --force-reset",
     "scraper": "ts-node src/scraper/scraper.ts",
