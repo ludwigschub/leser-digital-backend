@@ -33,7 +33,7 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
       return
     }
 
-    if(!(key in converters)) {
+    if (!(key in converters)) {
       console.error(`❌ No converter found for source ${key}.`)
       return
     }
@@ -44,8 +44,17 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
       parser.parseURL(feedUrl).then((feed) => {
         Promise.all(
           feed.items.map(async (item) => {
+            const exists = await prisma.article.findFirst({
+              where: {
+                title: item.title,
+                source: { key },
+                url: item.url,
+              },
+            })
             const articleConverter = new converter(source, item)
-            const article = await articleConverter.convertArticle()
+            const article = await articleConverter.convertArticle(
+              exists?.category
+            )
             if (debug && article) {
               console.debug(`📝 Article: ${article.title} (${article.url})`)
               console.debug(`🗃️ Category: ${article.category}`)
@@ -74,13 +83,6 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
                   })),
                 },
               }
-              const exists = await prisma.article.findFirst({
-                where: {
-                  title: article.title,
-                  source: { key },
-                  url: article.url,
-                },
-              })
               if (exists) {
                 await prisma.article.update({
                   data: newArticleInput,
