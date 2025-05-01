@@ -12,7 +12,6 @@ export const HANDELSBLATT_RSS_FEEDS = [
   "https://www.handelsblatt.com/contentexport/feed/wirtschaft",
   "https://www.handelsblatt.com/contentexport/feed/top-themen",
   "https://www.handelsblatt.com/contentexport/feed/finanzen",
-  "https://www.handelsblatt.com/contentexport/feed/boerse",
   "https://www.handelsblatt.com/contentexport/feed/unternehmen",
   "https://www.handelsblatt.com/contentexport/feed/politik",
   "https://www.handelsblatt.com/contentexport/feed/technologie",

@@ -28,7 +28,7 @@ export const Source = objectType({
       type: "Subscription",
       resolve: async (parent, _arg, { prisma, user }: Context) => {
         if (!user) {
-          return false
+          return null
         }
         const subscription = await prisma.subscription.findFirst({
           where: { userId: user.id, sourceId: parent.id },

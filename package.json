@@ -12,6 +12,7 @@
     "deploy": "bash deployment/scripts/deploy.sh",
     "db:seed": "ts-node prisma/seed.ts",
     "db:flush": "prisma db push --force-reset",
+    "db:reseed": "yarn db:flush && yarn db:seed",
     "scraper": "ts-node src/scraper/scraper.ts",
     "dev:scraper": "ts-node-dev --respawn src/scraper/scraper.ts"
   },

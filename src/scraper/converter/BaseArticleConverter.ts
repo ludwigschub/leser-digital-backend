@@ -1,4 +1,4 @@
-import { ArticleCategory, Source } from "@prisma/client"
+import { Article, ArticleCategory, Source } from "@prisma/client"
 import axios from "axios"
 import { toKebabCase } from "js-convert-case"
 import { JSDOM } from "jsdom"
@@ -7,7 +7,7 @@ import TurndownService from "turndown"
 
 import { classifyText } from "../openai"
 
-interface ConvertedArticle {
+export interface ConvertedArticle {
   title: string
   content?: string
   description: string
@@ -37,7 +37,7 @@ export class BaseArticleConverter {
 
   public async convertArticle(
     this: BaseArticleConverter,
-    existingCategory?: ArticleCategory
+    existing?: Article | null
   ): Promise<ConvertedArticle | undefined> {
     try {
       const {
@@ -53,17 +53,18 @@ export class BaseArticleConverter {
         console.log("❌ Missing title or link. Skipping...")
         return
       }
-      const response = await axios.get(url).catch(() => {
-        console.error("❌ Error fetching article...")
-        return undefined
-      })
-      const dom = new JSDOM(response?.data)
-      const head = dom.window.document.head.innerHTML
-      const html = dom.window.document.body.innerHTML
 
-      if (!html) {
-        console.log("❌ No content found. Skipping...")
-        return
+      let html: string | undefined
+      let head: string | undefined
+      if (!existing) {
+        const response = await axios.get(url).catch(() => {
+          console.error("❌ Error fetching article...")
+          return undefined
+        })
+
+        const dom = new JSDOM(response?.data)
+        head = dom.window.document.head.innerHTML
+        html = dom.window.document.body.innerHTML
       }
 
       this.article.title = this.convertTitle(rawTitle, html, head)
@@ -80,10 +81,10 @@ export class BaseArticleConverter {
 
       this.article.creators = this.convertCreators(creator, html, head)
 
-      if (!existingCategory) {
+      if (!existing) {
         this.article.category = await this.convertCategory(html, head)
       } else {
-        this.article.category = existingCategory
+        this.article.category = existing.category
       }
 
       this.article.short = this.isShort(html, head)
@@ -102,8 +103,8 @@ export class BaseArticleConverter {
   public convertTitle(
     this: BaseArticleConverter,
     title: string,
-    _html: string,
-    _head: string
+    _html?: string,
+    _head?: string
   ): string {
     return title
   }
@@ -111,8 +112,8 @@ export class BaseArticleConverter {
   public convertDescription(
     this: BaseArticleConverter,
     description: string | undefined,
-    _html: string,
-    _head: string
+    _html?: string,
+    _head?: string
   ): string {
     return description ?? ""
   }
@@ -120,8 +121,8 @@ export class BaseArticleConverter {
   public convertImage(
     this: BaseArticleConverter,
     enclosure: RssParser.Enclosure | undefined,
-    _html: string,
-    _head: string
+    _html?: string,
+    _head?: string
   ): string | undefined {
     if (
       (enclosure?.type === "image/jpeg" || enclosure?.type === "image/png") &&
@@ -135,8 +136,8 @@ export class BaseArticleConverter {
   public convertCreators(
     this: BaseArticleConverter,
     creator: string | undefined,
-    _html: string,
-    _head: string
+    _html?: string,
+    _head?: string
   ): string[] {
     if (!creator) {
       return [this.source.name]
@@ -147,8 +148,8 @@ export class BaseArticleConverter {
 
   public async convertCategory(
     this: BaseArticleConverter,
-    _html: string,
-    _head: string
+    _html?: string,
+    _head?: string
   ): Promise<ArticleCategory> {
     const categories = [
       ...Object.keys(ArticleCategory).map((category) => category),
@@ -168,13 +169,17 @@ export class BaseArticleConverter {
 
   public isShort(
     this: BaseArticleConverter,
-    _html: string,
-    _head: string
+    _html?: string,
+    _head?: string
   ): boolean {
     return false
   }
 
-  public isPaywalled(this: BaseArticleConverter, _html: string, _head: string) {
+  public isPaywalled(
+    this: BaseArticleConverter,
+    _html?: string,
+    _head?: string
+  ) {
     return false
   }
 

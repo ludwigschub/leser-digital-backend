@@ -1,10 +1,11 @@
-import { Source } from "@prisma/client"
+import { Prisma, Source } from "@prisma/client"
 import RssParser from "rss-parser"
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
 
 import prisma from "../prismaClient"
 
+import { ConvertedArticle } from "./converter/BaseArticleConverter"
 import { converters } from "./converters"
 
 const parser = new RssParser()
@@ -25,86 +26,88 @@ const getOrCreateEditor = async (name: string, source: Source) => {
   return newEditor
 }
 
+const debugMessage = (article: ConvertedArticle) => {
+  console.debug(`📝 Article: ${article.title} (${article.url})`)
+  console.debug(`🗃️ Category: ${article.category}`)
+  console.debug(`⏰ Published: ${article.uploadedAt}`)
+  console.debug(`✍️ Creator: ${article.creators}`)
+}
+
 async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
   const sources = await prisma.source.findMany()
-  sources.forEach((source) => {
+
+  for (const source of sources) {
     const { key, feeds, name } = source
+
     if (feedKey && key !== feedKey) {
-      return
+      continue
     }
 
     if (!(key in converters)) {
       console.error(`❌ No converter found for source ${key}.`)
-      return
+      continue
     }
 
     console.log(`📖 Converting articles from ${name}...`)
     const converter = converters[key]
-    feeds.forEach((feedUrl) => {
-      parser.parseURL(feedUrl).then((feed) => {
-        Promise.all(
-          feed.items.map(async (item) => {
-            const exists = await prisma.article.findFirst({
-              where: {
-                title: item.title,
-                source: { key },
-                url: item.url,
-              },
-            })
-            const articleConverter = new converter(source, item)
-            const article = await articleConverter.convertArticle(
-              exists?.category
+
+    for (const feedUrl of feeds) {
+      try {
+        const feed = await parser.parseURL(feedUrl)
+
+        for (const item of feed.items) {
+          const exists = await prisma.article.findFirst({
+            where: {
+              title: item.title,
+              source: { key },
+              url: item.url,
+            },
+          })
+
+          const articleConverter = new converter(source, item)
+          const article = await articleConverter.convertArticle(
+            exists
+          )
+
+          if (debug && article) {
+            debugMessage(article)
+          }
+
+          if (!dry && article) {
+            const editors = await Promise.all(
+              article.creators?.map((creator) =>
+                getOrCreateEditor(creator, source)
+              ) ?? []
             )
-            if (debug && article) {
-              console.debug(`📝 Article: ${article.title} (${article.url})`)
-              console.debug(`🗃️ Category: ${article.category}`)
-              console.debug(`⏰ Published: ${article.uploadedAt}`)
-              console.debug(`✍️ Creator: ${article.creators}`)
+            const { creators: _creators, ...newArticle } = article
+
+            const newArticleInput: Prisma.ArticleCreateInput = {
+              ...newArticle,
+              source: { connect: { key } },
+              editors: {
+                connect: editors.map(({ id }) => ({ id })),
+              },
             }
-            if (!dry && article) {
-              const editors = await Promise.all(
-                article.creators?.map((creator) =>
-                  getOrCreateEditor(creator, source)
-                ) ?? []
-              )
-              const newArticleInput = {
-                title: article.title,
-                url: article.url,
-                uploadedAt: article.uploadedAt,
-                category: article.category,
-                description: article.description,
-                image: article.image,
-                premium: article.premium,
-                short: article.short,
-                source: { connect: { key } },
-                editors: {
-                  connect: editors.map((editor) => ({
-                    id: editor.id,
-                  })),
-                },
-              }
-              if (exists) {
-                await prisma.article.update({
-                  data: newArticleInput,
-                  where: { id: exists.id },
-                })
-              } else {
-                await prisma.article.create({
-                  data: newArticleInput,
-                })
-              }
+
+            if (exists) {
+              await prisma.article.update({
+                data: newArticleInput,
+                where: { id: exists.id },
+              })
+            } else {
+              await prisma.article.create({
+                data: newArticleInput,
+              })
             }
-          })
-        )
-          .then(() => {
-            console.log(`✅ Articles from ${key} converted successfully!`)
-          })
-          .catch((error) => {
-            console.error(`❌ Error converting articles from ${key}:`, error)
-          })
-      })
-    })
-  })
+          }
+        }
+      } catch (error) {
+        console.error(`❌ Error parsing feed ${feedUrl}:`, error)
+      }
+    }
+
+    console.log(`✅ Articles from ${key} converted successfully!`)
+  }
 }
 
 ;(async () => {

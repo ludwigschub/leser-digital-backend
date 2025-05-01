@@ -118,6 +118,7 @@ enum ArticleCategory {
   GAMING
   TRAVEL
   ART
+  LAW
   PSYCHOLOGY
   HISTORY
   FOOD
