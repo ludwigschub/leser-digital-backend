@@ -17,7 +17,7 @@ export const sourceQueries = extendType({
         key: "String",
       },
       resolve: async (_parent, { key }, { prisma }: Context) => {
-        return await prisma.source.findUnique({
+        return await prisma.source.findFirst({
           where: { key },
         })
       },

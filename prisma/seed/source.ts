@@ -86,8 +86,8 @@ const getSources = (): Prisma.SourceCreateInput[] => [
 export const seedSources = async () => {
   const sources = getSources()
   return await Promise.all(
-    sources.map((source, index) => {
-      return prisma.source.create({ data: { ...source, id: index } })
+    sources.map((source) => {
+      return prisma.source.create({ data: { ...source } })
     })
   )
 }

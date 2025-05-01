@@ -9,8 +9,8 @@ export const SubscriptionMutations = extendType({
     t.field("createSubscription", {
       type: "Subscription",
       args: {
-        sourceId: "Int",
-        editorId: "Int",
+        sourceId: "String",
+        editorId: "String",
         category: "ArticleCategory",
       },
       resolve: async (
@@ -47,7 +47,7 @@ export const SubscriptionMutations = extendType({
     t.field("deleteSubscription", {
       type: "Subscription",
       args: {
-        id: "Int",
+        id: "String",
       },
       resolve: async (_parent, { id }, { prisma, user }: Context) => {
         if (!user) {

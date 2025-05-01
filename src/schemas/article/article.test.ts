@@ -1,4 +1,5 @@
 import { Article, ArticleActivityType, User } from "@prisma/client"
+
 import { executeQuery } from "../../../test/helpers"
 import prisma from "../../prismaClient"
 

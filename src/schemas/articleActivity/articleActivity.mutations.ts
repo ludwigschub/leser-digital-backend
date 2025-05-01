@@ -5,7 +5,7 @@ import { Context } from "../../context"
 export const ArticleActivityInput = inputObjectType({
   name: "ArticleActivityInput",
   definition(t) {
-    t.nonNull.int("articleId")
+    t.nonNull.string("articleId")
     t.nonNull.field("type", { type: "ArticleActivityType" })
   },
 })
@@ -32,7 +32,7 @@ export const ArticleActivityMutations = extendType({
     })
     t.field("deleteArticleActivity", {
       type: "ArticleActivity",
-      args: { id: nonNull("Int") },
+      args: { id: nonNull("String") },
       resolve: async (_parent, { id }, { prisma }: Context) => {
         return await prisma.articleActivity.delete({
           where: {

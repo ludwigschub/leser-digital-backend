@@ -24,8 +24,8 @@ export const Source = objectType({
         })
       },
     })
-    t.field("isSubscribed", {
-      type: "Boolean",
+    t.nullable.field("isSubscribed", {
+      type: "Subscription",
       resolve: async (parent, _arg, { prisma, user }: Context) => {
         if (!user) {
           return false
@@ -33,7 +33,7 @@ export const Source = objectType({
         const subscription = await prisma.subscription.findFirst({
           where: { userId: user.id, sourceId: parent.id },
         })
-        return !!subscription
+        return subscription
       },
     })
     t.field("articleCount", {

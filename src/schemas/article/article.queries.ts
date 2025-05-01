@@ -16,7 +16,7 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
           id: {
             in: subscriptions
               .map((s) => s.sourceId)
-              .filter((id) => id !== null && id !== undefined) as number[],
+              .filter((id) => id !== null && id !== undefined) as string[],
           },
         },
       },
@@ -26,7 +26,7 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
             id: {
               in: subscriptions
                 .map((s) => s.editorId)
-                .filter((id) => id !== null && id !== undefined) as number[],
+                .filter((id) => id !== null && id !== undefined) as string[],
             },
           },
         },
