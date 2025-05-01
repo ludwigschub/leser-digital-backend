@@ -1,5 +1,7 @@
 api:
-  image: ghcr.io/ludwigschub/leser-digital-backend:latest
+  image: 
+    repository: ghcr.io/ludwigschub/leser-digital-backend
+    tag: latest
   servicePort: 4000
   env:
     frontendUrl: https://leser.digital
@@ -19,7 +21,9 @@ api:
       key: OPENAI_API_KEY
 
 cronjob:
-  image: ghcr.io/ludwigschub/leser-digital-backend:latest
+  image:
+    repository: ghcr.io/ludwigschub/leser-digital-backend
+    tag: latest
   schedule: "*/10 * * * *"
 
 ingress:
