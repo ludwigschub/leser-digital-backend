@@ -83,15 +83,15 @@ export class BaseArticleConverter {
 
       if (!existing) {
         this.article.category = await this.convertCategory(html, head)
+        this.article.short = this.isShort(html, head)
+        this.article.premium = this.isPaywalled(html, head)
+        this.article.url = url
       } else {
         this.article.category = existing.category
+        this.article.short = existing.short
+        this.article.premium = existing.premium
+        this.article.url = existing.url
       }
-
-      this.article.short = this.isShort(html, head)
-
-      this.article.premium = this.isPaywalled(html, head)
-
-      this.article.url = url
 
       return this.article as ConvertedArticle
     } catch (error) {
