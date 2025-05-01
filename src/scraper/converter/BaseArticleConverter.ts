@@ -4,6 +4,7 @@ import { toKebabCase } from "js-convert-case"
 import { JSDOM } from "jsdom"
 import RssParser from "rss-parser"
 import TurndownService from "turndown"
+
 import { classifyText } from "../openai"
 
 interface ConvertedArticle {
@@ -34,7 +35,10 @@ export class BaseArticleConverter {
     this.article = {}
   }
 
-  public async convertArticle(this: BaseArticleConverter) {
+  public async convertArticle(
+    this: BaseArticleConverter,
+    existingCategory?: ArticleCategory
+  ): Promise<ConvertedArticle | undefined> {
     try {
       const {
         title: rawTitle,
@@ -76,7 +80,11 @@ export class BaseArticleConverter {
 
       this.article.creators = this.convertCreators(creator, html, head)
 
-      this.article.category = await this.convertCategory(html, head)
+      if (!existingCategory) {
+        this.article.category = await this.convertCategory(html, head)
+      } else {
+        this.article.category = existingCategory
+      }
 
       this.article.short = this.isShort(html, head)
 
@@ -153,9 +161,7 @@ export class BaseArticleConverter {
     if (category && categories.find((c) => c === category)) {
       return category as ArticleCategory
     } else {
-      console.debug(
-        `❌ Unknown category "${category}"`
-      )
+      console.debug(`❌ Unknown category "${category}"`)
       return ArticleCategory.UNKNOWN
     }
   }
