@@ -58,7 +58,6 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
         for (const item of feed.items) {
           const exists = await prisma.article.findFirst({
             where: {
-              title: item.title,
               source: { key },
               url: item.url,
             },
