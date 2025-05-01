@@ -24,11 +24,21 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Build the Docker image
-      - name: Build Docker image
+      - name: Build commit Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/leser-digital-backend:${{ github.sha }} .
+
+      # Push the Docker image to GHCR
+      - name: Push commit Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/leser-digital-backend:${{ github.sha }}
+
+      # Build the Docker image
+      - name: Build latest Docker image
         run: |
           docker build -t ghcr.io/${{ github.repository_owner }}/leser-digital-backend:latest .
 
       # Push the Docker image to GHCR
-      - name: Push Docker image
+      - name: Push latest Docker image
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/leser-digital-backend:latest

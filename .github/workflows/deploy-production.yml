@@ -38,6 +38,7 @@ jobs:
         env:
           NAMESPACE: production
           RELEASE_NAME: leser-digital-backend-prod
+          RELEASE_TAG: ${{ github.sha }}
         run: |
           bash deployment/scripts/deploy.sh
       # Trigger frontend redeployment on DigitalOcean App Platform

@@ -9,14 +9,20 @@ export class T3NArticleConverter extends BaseArticleConverter {
 
   public convertCreators(
     this: BaseArticleConverter,
-    creator: string | undefined,
-    _html: string
+    _creator: string | undefined,
+    _html: string,
+    head: string
   ): string[] {
-    if (!creator) {
+    const dom = JSDOM.fragment(head)
+    const meta = dom.querySelector("meta[name='author']")?.getAttribute("content")
+    if (!meta) {
       return [this.source.name]
+    } else {
+      return [
+        ...meta.split(",").map((creator) => creator.trim()),
+        this.source.name,
+      ]
     }
-
-    return [creator, this.source.name]
   }
 
   public isShort(this: BaseArticleConverter, _html: string): boolean {

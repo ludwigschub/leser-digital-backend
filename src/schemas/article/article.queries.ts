@@ -73,7 +73,7 @@ export const articleQueries = extendType({
         const filter = {
           source: source ? { key: source } : undefined,
           editors: editor ? { some: { name: editor } } : undefined,
-          category: category ? { equals: category } : null,
+          category: category ? { equals: category } : undefined,
           short: false,
         } as Prisma.ArticleWhereInput
         return await prisma.article.findMany({

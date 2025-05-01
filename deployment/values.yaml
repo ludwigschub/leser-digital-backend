@@ -20,7 +20,7 @@ api:
 
 cronjob:
   image: ghcr.io/ludwigschub/leser-digital-backend:latest
-  schedule: "*/5 * * * *"
+  schedule: "*/10 * * * *"
 
 ingress:
   host: api.leser.digital

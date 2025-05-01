@@ -40,7 +40,7 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
 
     console.log(`📖 Converting articles from ${name}...`)
     const converter = converters[key]
-    feeds.forEach(async (feedUrl) => {
+    feeds.forEach((feedUrl) => {
       parser.parseURL(feedUrl).then((feed) => {
         Promise.all(
           feed.items.map(async (item) => {
