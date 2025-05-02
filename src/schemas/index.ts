@@ -1,3 +1,5 @@
+import { inputObjectType } from "nexus"
+
 export * from "./user"
 export * from "./verificationCode"
 
@@ -7,3 +9,10 @@ export * from "./editor"
 export * from "./source"
 export * from "./subscription"
 
+export const PaginationInput = inputObjectType({
+  name: "PaginationInput",
+  definition(t) {
+    t.int("offset", { default: 0 })
+    t.int("limit", { default: 10 })
+  },
+})

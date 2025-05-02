@@ -47,7 +47,10 @@ export const articleQueries = extendType({
   definition(t) {
     t.list.nonNull.field("articles", {
       type: "Article",
-      args: { filter: nullable("ArticleQueryFilter") },
+      args: {
+        filter: nullable("ArticleQueryFilter"),
+        pagination: "PaginationInput",
+      },
       resolve: async (_parent, args, { prisma, user }: Context) => {
         if (user) {
           const userSubscriptions = await prisma.subscription.findMany({
@@ -66,6 +69,8 @@ export const articleQueries = extendType({
               orderBy: {
                 uploadedAt: "desc",
               },
+              take: args.pagination?.limit,
+              skip: args.pagination?.offset,
             })
           }
         }
@@ -85,6 +90,8 @@ export const articleQueries = extendType({
           orderBy: {
             uploadedAt: "desc",
           },
+          take: args.pagination?.limit,
+          skip: args.pagination?.offset,
         })
       },
     })
