@@ -5,6 +5,7 @@ import { hideBin } from "yargs/helpers"
 
 import prisma from "../prismaClient"
 
+import { exit } from "process"
 import { ConvertedArticle } from "./converter/BaseArticleConverter"
 import { converters } from "./converters"
 
@@ -48,9 +49,10 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
       continue
     }
 
-    console.log(`📖 Converting articles from ${name}...`)
+    console.log(`Converting articles from ${name}...`)
     const converter = converters[key]
 
+    let newArticles = 0
     for (const feedUrl of feeds) {
       try {
         const feed = await parser.parseURL(feedUrl)
@@ -62,11 +64,10 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
               url: item.url,
             },
           })
+          newArticles += exists ? 0 : 1
 
           const articleConverter = new converter(source, item)
-          const article = await articleConverter.convertArticle(
-            exists
-          )
+          const article = await articleConverter.convertArticle(exists)
 
           if (debug && article) {
             debugMessage(article)
@@ -105,8 +106,14 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
       }
     }
 
-    console.log(`✅ Articles from ${key} converted successfully!`)
+    if (newArticles) {
+      console.log(`✅ Converted ${newArticles} new articles from ${key}!`)
+    } else {
+      console.log(`No new articles from ${key}.`)
+    }
   }
+
+  return Promise.resolve()
 }
 
 ;(async () => {
@@ -130,5 +137,8 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
     })
     .help().argv
 
-  scrape(argv.feed, argv.debug, argv.dry)
+  return scrape(argv.feed, argv.debug, argv.dry).then(() => {
+    console.debug("✅ Scraping completed!")
+    exit()
+  })
 })()
