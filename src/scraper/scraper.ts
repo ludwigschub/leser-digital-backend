@@ -68,11 +68,10 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
           const exists = await prisma.article.findUnique({
             where: {
               source: { key },
-              url: item.link,
+              url: item.linklink,
             },
           })
-          newArticles += exists ? 0 : 1
-
+          
           const articleConverter = new converter(source, item)
           const article = await articleConverter.convertArticle(exists)
 
@@ -106,6 +105,8 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
                 data: newArticleInput,
               })
             }
+
+            newArticles += exists || article?.short ? 0 : 1
           }
         }
       } catch (error) {
@@ -145,7 +146,7 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
     .help().argv
 
   return scrape(argv.feed, argv.debug, argv.dry).then(() => {
-    console.debug("✅ Scraping completed!")
+    console.debug("🏁 Scraping completed!")
     exit()
   })
 })()
