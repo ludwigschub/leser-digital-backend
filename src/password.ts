@@ -1,3 +1,5 @@
+import crypto from "crypto"
+
 export const hashPassword = async (password: string) => {
   const passwordHash = await crypto.subtle.digest(
     "SHA-256",
