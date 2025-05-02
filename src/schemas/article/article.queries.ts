@@ -56,7 +56,7 @@ export const articleQueries = extendType({
           const userSubscriptions = await prisma.subscription.findMany({
             where: { userId: user.id },
           })
-          if (userSubscriptions.length > 0) {
+          if (userSubscriptions.length > 0 && !args.filter) {
             return await prisma.article.findMany({
               where: {
                 ...getArticleSubscriptionsFilter(userSubscriptions),
