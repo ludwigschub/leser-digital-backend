@@ -1,3 +1,5 @@
+import { exit } from "process"
+
 import { Prisma, Source } from "@prisma/client"
 import RssParser from "rss-parser"
 import yargs from "yargs"
@@ -5,7 +7,6 @@ import { hideBin } from "yargs/helpers"
 
 import prisma from "../prismaClient"
 
-import { exit } from "process"
 import { ConvertedArticle } from "./converter/BaseArticleConverter"
 import { converters } from "./converters"
 
@@ -58,10 +59,16 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
         const feed = await parser.parseURL(feedUrl)
 
         for (const item of feed.items) {
-          const exists = await prisma.article.findFirst({
+          if (!item.link) {
+            console.error(`❌ No URL found for item in feed ${feedUrl}.`)
+            console.debug(item)
+            continue
+          }
+
+          const exists = await prisma.article.findUnique({
             where: {
               source: { key },
-              url: item.url,
+              url: item.link,
             },
           })
           newArticles += exists ? 0 : 1

@@ -56,7 +56,7 @@ export class BaseArticleConverter {
 
       let html: string | undefined
       let head: string | undefined
-      if (!existing) {
+      if (!existing || !existing.image) {
         const response = await axios.get(url).catch(() => {
           console.error("❌ Error fetching article...")
           return undefined

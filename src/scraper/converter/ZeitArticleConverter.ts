@@ -1,10 +1,26 @@
 import { JSDOM } from "jsdom"
+import RssParser from "rss-parser"
 
 import { BaseArticleConverter } from "./BaseArticleConverter"
 
 export class ZeitArticleConverter extends BaseArticleConverter {
   public convertTitle(this: BaseArticleConverter, title: string): string {
     return title
+  }
+
+  public convertImage(
+    this: BaseArticleConverter,
+    image: RssParser.Enclosure | undefined,
+    _html: string,
+    head: string
+  ) {
+    if (image) {
+      return image.url
+    }
+    const dom = JSDOM.fragment(head)
+    const meta = dom.querySelector("meta[property='og:image']")
+    const ogImage = meta?.getAttribute("content")
+    return ogImage as string
   }
 
   public convertCreators(

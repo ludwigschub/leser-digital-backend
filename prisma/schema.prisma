@@ -86,7 +86,7 @@ model Article {
   title       String
   description String?
   content     String?
-  url         String
+  url         String            @unique
   image       String?
   category    ArticleCategory
   premium     Boolean           @default(false)
