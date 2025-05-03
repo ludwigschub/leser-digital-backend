@@ -21,7 +21,7 @@ export const Article = objectType({
     t.field(ArticleType.uploadedAt)
     t.field(ArticleType.createdAt)
     t.field(ArticleType.updatedAt)
-    t.list.field("activity", {
+    t.list.nonNull.field("activity", {
       type: nullable("ArticleActivity"),
       resolve: (parent, _args, { prisma, user }) => {
         return prisma.articleActivity.findMany({

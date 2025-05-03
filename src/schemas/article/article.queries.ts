@@ -174,10 +174,17 @@ export const articleQueries = extendType({
         })
       },
     })
-    t.list.field("mostViewedArticles", {
+    t.list.nonNull.field("mostViewedArticles", {
       type: "Article",
       resolve: async (_parent, _args, { prisma }: Context) => {
         const mostViewed = await prisma.article.findMany({
+          where: {
+            activity: {
+              some: {
+                type: ArticleActivityType.VIEW_ARTICLE,
+              },
+            },
+          },
           include: {
             _count: {
               select: {

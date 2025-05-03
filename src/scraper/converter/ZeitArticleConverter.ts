@@ -5,7 +5,8 @@ import { BaseArticleConverter } from "./BaseArticleConverter"
 
 export class ZeitArticleConverter extends BaseArticleConverter {
   public convertTitle(this: BaseArticleConverter, title: string): string {
-    return title
+    const first = title?.substring(0, title.indexOf(": ") + 2)
+    return title.replace(first, "")
   }
 
   public convertImage(
@@ -14,13 +15,13 @@ export class ZeitArticleConverter extends BaseArticleConverter {
     _html: string,
     head: string
   ) {
-    if (image) {
-      return image.url
-    }
     const dom = JSDOM.fragment(head)
     const meta = dom.querySelector("meta[property='og:image']")
     const ogImage = meta?.getAttribute("content")
-    return ogImage as string
+    if (ogImage) {
+      return ogImage as string
+    }
+    return image?.url
   }
 
   public convertCreators(
