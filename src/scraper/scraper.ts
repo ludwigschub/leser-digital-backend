@@ -68,7 +68,7 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
           const exists = await prisma.article.findUnique({
             where: {
               source: { key },
-              url: item.linklink,
+              url: item.link,
             },
           })
           
