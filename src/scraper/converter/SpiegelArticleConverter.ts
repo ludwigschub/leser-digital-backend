@@ -3,12 +3,9 @@ import { JSDOM } from "jsdom"
 import { BaseArticleConverter } from "./BaseArticleConverter"
 
 export class SpiegelArticleConverter extends BaseArticleConverter {
-  public convertTitle(
-    this: BaseArticleConverter,
-    title: string,
-    _html: string
-  ): string {
-    return title
+  public convertTitle(this: BaseArticleConverter, title: string): string {
+    const first = title?.substring(0, title.indexOf(": ") + 2)
+    return title.replace(first, "")
   }
 
   public convertCreators(
