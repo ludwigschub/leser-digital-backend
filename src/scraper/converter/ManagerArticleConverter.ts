@@ -1,4 +1,5 @@
 import { JSDOM } from "jsdom"
+import RssParser from "rss-parser"
 
 import { BaseArticleConverter } from "./BaseArticleConverter"
 
@@ -6,6 +7,21 @@ export class ManagerArticleConverter extends BaseArticleConverter {
   public convertTitle(this: BaseArticleConverter, title: string): string {
     const first = title?.substring(0, title.indexOf(": ") + 2)
     return title.replace(first, "")
+  }
+
+  public convertImage(
+    this: BaseArticleConverter,
+    image: RssParser.Enclosure | undefined,
+    _html: string,
+    head: string
+  ) {
+    const dom = JSDOM.fragment(head)
+    const meta = dom.querySelector("meta[property='og:image']")
+    const ogImage = meta?.getAttribute("content")
+    if (ogImage) {
+      return ogImage as string
+    }
+    return image?.url
   }
 
   public convertCreators(
