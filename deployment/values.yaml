@@ -14,7 +14,7 @@ api:
     mailgunSecret:
       name: mailgun-credentials
       key: MAILGUN_API_KEY
-    mailgunDomain: mail.leser.digital
+    mailgunDomain: mg.leser.digital
     mailgunSenderEmail: no-reply@leser.digital
     openAiSecret:
       name: openai-credentials
