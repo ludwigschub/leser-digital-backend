@@ -5,7 +5,8 @@ import { BaseArticleConverter } from "./BaseArticleConverter"
 
 export class TagesschauArticleConverter extends BaseArticleConverter {
   public convertTitle(this: BaseArticleConverter, title: string): string {
-    return title
+    const first = title?.substring(0, title.indexOf(": ") + 2)
+    return title.replace(first, "")
   }
 
   public convertImage(

@@ -60,7 +60,7 @@ export const articleQueries = extendType({
             return await prisma.article.findMany({
               where: {
                 ...getArticleSubscriptionsFilter(userSubscriptions),
-                short: false,
+                short: args.filter?.short ?? false,
               },
               include: {
                 source: { include: { editors: false } },
@@ -74,12 +74,12 @@ export const articleQueries = extendType({
             })
           }
         }
-        const { source, editor, category } = args.filter ?? {}
+        const { source, editor, category, short } = args.filter ?? {}
         const filter = {
           source: source ? { key: source } : undefined,
           editors: editor ? { some: { name: editor } } : undefined,
           category: category ? { equals: category } : undefined,
-          short: false,
+          short,
         } as Prisma.ArticleWhereInput
         return await prisma.article.findMany({
           where: filter,

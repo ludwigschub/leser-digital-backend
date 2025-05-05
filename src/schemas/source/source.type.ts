@@ -40,7 +40,7 @@ export const Source = objectType({
       type: "Int",
       resolve: async (parent, _arg, { prisma }: Context) => {
         return await prisma.article.count({
-          where: { source: { id: parent.id }, short: false },
+          where: { source: { id: parent.id } },
         })
       },
     })
