@@ -4,6 +4,10 @@ import { BaseArticleConverter } from "./BaseArticleConverter"
 
 export class T3NArticleConverter extends BaseArticleConverter {
   public convertTitle(this: BaseArticleConverter, title: string): string {
+    if (title.includes(": ")) {
+      const first = title?.substring(0, title.indexOf(": ") + 2)
+      return title.replace(first, "")
+    }
     return title
   }
 
