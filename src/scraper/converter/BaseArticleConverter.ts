@@ -68,6 +68,7 @@ export class BaseArticleConverter {
       }
 
       this.article.title = this.convertTitle(rawTitle, html, head)
+      console.debug(`📝 Title: ${this.article.title}`, rawTitle)
 
       this.article.description = this.convertDescription(
         rawDescription ?? rawContentSnippet,

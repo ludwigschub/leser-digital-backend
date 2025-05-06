@@ -5,8 +5,11 @@ import { BaseArticleConverter } from "./BaseArticleConverter"
 
 export class SportschauArticleConverter extends BaseArticleConverter {
   public convertTitle(this: BaseArticleConverter, title: string): string {
-    const first = title?.substring(0, title.indexOf(": ") + 2)
-    return title.replace(first, "")
+    if (title.includes(": ")) {
+      const first = title?.substring(0, title.indexOf(": ") + 2)
+      return title.replace(first, "")
+    }
+    return title
   }
 
   public convertImage(
