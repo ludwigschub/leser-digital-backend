@@ -141,8 +141,7 @@ const getTopics = (): Prisma.TopicCreateInput[] => [
   {
     category: ArticleCategory.SPORTS,
     name: "Sport",
-    banner:
-      "https://upload.wikimedia.org/wikipedia/commons/8/8f/Incheon_Soccer_Stadium_2.JPG",
+    banner: "https://live.staticflickr.com/3883/14239464268_ce63ddcece.jpg",
   },
   {
     category: ArticleCategory.TECHNOLOGY,
@@ -162,8 +161,7 @@ const getTopics = (): Prisma.TopicCreateInput[] => [
   {
     category: ArticleCategory.FINANCE,
     name: "Finanzen",
-    banner:
-      "https://live.staticflickr.com/44/132198746_a2f53e2ee1_b.jpg",
+    banner: "https://live.staticflickr.com/44/132198746_a2f53e2ee1_b.jpg",
   },
   {
     category: ArticleCategory.AUTOMOTIVE,
