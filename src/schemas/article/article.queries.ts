@@ -1,9 +1,4 @@
-import {
-  ArticleActivityType,
-  ArticleCategory,
-  Prisma,
-  Subscription,
-} from "@prisma/client"
+import { ArticleActivityType, Prisma, Subscription } from "@prisma/client"
 import { extendType, nullable } from "nexus"
 
 import { Context } from "../../context"
@@ -11,35 +6,41 @@ import { Context } from "../../context"
 const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
   return {
     OR: [
-      {
-        source: {
-          id: {
-            in: subscriptions
-              .map((s) => s.sourceId)
-              .filter((id) => id !== null && id !== undefined) as string[],
-          },
-        },
-      },
-      {
-        editors: {
-          some: {
-            id: {
-              in: subscriptions
-                .map((s) => s.editorId)
-                .filter((id) => id !== null && id !== undefined) as string[],
+      ...(subscriptions.find((s) => s.sourceId)
+        ? [
+            {
+              source: {
+                id: {
+                  in: subscriptions.map((s) => s.sourceId),
+                },
+              },
             },
-          },
-        },
-      },
-      {
-        category: {
-          in: subscriptions
-            .map((s) => s.category)
-            .filter((category) => Boolean(category)) as ArticleCategory[],
-        },
-      },
+          ]
+        : []),
+      ...(subscriptions.find((s) => s.editorId)
+        ? [
+            {
+              editors: {
+                id: {
+                  in: subscriptions.map((s) => s.editorId),
+                },
+              },
+            },
+          ]
+        : []),
+      ...(subscriptions.find((s) => s.topicId)
+        ? [
+            {
+              topic: {
+                id: {
+                  in: subscriptions.map((s) => s.topicId),
+                },
+              },
+            },
+          ]
+        : []),
     ],
-  }
+  } as Prisma.ArticleWhereInput
 }
 
 export const articleQueries = extendType({
@@ -56,7 +57,10 @@ export const articleQueries = extendType({
           const userSubscriptions = await prisma.subscription.findMany({
             where: { userId: user.id },
           })
-          if (userSubscriptions.length > 0 && !args.filter) {
+          if (
+            userSubscriptions.length > 0 &&
+            !(args.filter?.source || args.filter?.editor)
+          ) {
             return await prisma.article.findMany({
               where: {
                 ...getArticleSubscriptionsFilter(userSubscriptions),

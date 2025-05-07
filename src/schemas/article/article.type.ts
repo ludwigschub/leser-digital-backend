@@ -15,7 +15,7 @@ export const Article = objectType({
     t.field(ArticleType.url)
     t.field(ArticleType.image)
     t.field(ArticleType.premium)
-    t.field(ArticleType.category)
+    t.field(ArticleType.topic)
     t.field(ArticleType.source)
     t.field(ArticleType.editors)
     t.field(ArticleType.uploadedAt)
@@ -46,7 +46,6 @@ export const articleQueryFilter = inputObjectType({
   definition(t) {
     t.string("source")
     t.string("editor")
-    t.string("category")
     t.boolean("short")
   },
 })

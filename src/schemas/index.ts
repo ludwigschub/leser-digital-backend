@@ -8,6 +8,7 @@ export * from "./articleActivity"
 export * from "./editor"
 export * from "./source"
 export * from "./subscription"
+export * from "./topic"
 
 export const PaginationInput = inputObjectType({
   name: "PaginationInput",

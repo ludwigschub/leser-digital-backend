@@ -8,7 +8,7 @@ export const Subscription = objectType({
     t.field(SubscriptionType.id)
     t.field(SubscriptionType.source)
     t.field(SubscriptionType.editor)
-    t.field(SubscriptionType.category)
+    t.field(SubscriptionType.topic)
     t.field(SubscriptionType.createdAt)
     t.field(SubscriptionType.updatedAt)
   },

@@ -68,17 +68,29 @@ model Editor {
   subscribers Subscription[]
 }
 
+model Topic {
+  id            String          @id @default(cuid())
+  name          String
+  banner        String
+  category      ArticleCategory @unique
+  subscriptions Subscription[]
+  articles      Article[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
 model Subscription {
-  id        String           @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   sourceId  String?
-  source    Source?          @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  category  ArticleCategory?
+  source    Source?  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  topicId   String?
+  topic     Topic?   @relation(fields: [topicId], references: [id])
   editorId  String?
-  editor    Editor?          @relation(fields: [editorId], references: [id], onDelete: Cascade)
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  editor    Editor?  @relation(fields: [editorId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Article {
@@ -88,7 +100,8 @@ model Article {
   content     String?
   url         String            @unique
   image       String?
-  category    ArticleCategory
+  topicId     String
+  topic       Topic             @relation(fields: [topicId], references: [id])
   premium     Boolean           @default(false)
   recommended Boolean           @default(false)
   short       Boolean           @default(false)
@@ -132,6 +145,8 @@ enum ArticleCategory {
   NATURE
   PHILOSOPHY
   LITERATURE
+  FINANCE
+  AUTOMOTIVE
   UNKNOWN
 }
 

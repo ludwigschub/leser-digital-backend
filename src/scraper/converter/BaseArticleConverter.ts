@@ -1,4 +1,4 @@
-import { Article, ArticleCategory, Source } from "@prisma/client"
+import { Article, ArticleCategory, Source, Topic } from "@prisma/client"
 import axios from "axios"
 import { toKebabCase } from "js-convert-case"
 import { JSDOM } from "jsdom"
@@ -37,7 +37,7 @@ export class BaseArticleConverter {
 
   public async convertArticle(
     this: BaseArticleConverter,
-    existing?: Article | null
+    existing?: (Article & { topic: Topic }) | null
   ): Promise<ConvertedArticle | undefined> {
     try {
       const {
@@ -58,7 +58,7 @@ export class BaseArticleConverter {
       let head: string | undefined
       if (!existing || !existing.image) {
         const response = await axios.get(url).catch(() => {
-          console.error("❌ Error fetching article...")
+          console.error("❌ Error fetching article...", url)
           return undefined
         })
 
@@ -68,7 +68,6 @@ export class BaseArticleConverter {
       }
 
       this.article.title = this.convertTitle(rawTitle, html, head)
-      console.debug(`📝 Title: ${this.article.title}`, rawTitle)
 
       this.article.description = this.convertDescription(
         rawDescription ?? rawContentSnippet,
@@ -88,7 +87,7 @@ export class BaseArticleConverter {
         this.article.premium = this.isPaywalled(html, head)
         this.article.url = url
       } else {
-        this.article.category = existing.category
+        this.article.category = existing.topic.category
         this.article.short = existing.short
         this.article.premium = existing.premium
         this.article.url = existing.url

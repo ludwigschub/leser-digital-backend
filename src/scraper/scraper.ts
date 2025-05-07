@@ -1,6 +1,6 @@
 import { exit } from "process"
 
-import { Prisma, Source } from "@prisma/client"
+import { ArticleCategory, Prisma, Source } from "@prisma/client"
 import RssParser from "rss-parser"
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
@@ -70,8 +70,11 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
               source: { key },
               url: item.link,
             },
+            include: {
+              topic: true,
+            },
           })
-          
+
           const articleConverter = new converter(source, item)
           const article = await articleConverter.convertArticle(exists)
 
@@ -85,11 +88,16 @@ async function scrape(feedKey?: string, debug?: boolean, dry?: boolean) {
                 getOrCreateEditor(creator, source)
               ) ?? []
             )
-            const { creators: _creators, ...newArticle } = article
+            const { creators: _creators, category, ...newArticle } = article
+
+            const topic = await prisma.topic.findFirst({ where: { category } })
 
             const newArticleInput: Prisma.ArticleCreateInput = {
               ...newArticle,
               source: { connect: { key } },
+              topic: topic
+                ? { connect: { id: topic?.id } }
+                : { connect: { category: ArticleCategory.UNKNOWN } },
               editors: {
                 connect: editors.map(({ id }) => ({ id })),
               },

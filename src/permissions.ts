@@ -7,7 +7,11 @@ import {
   articleActivityQueryRules,
 } from "./schemas/articleActivity/articleActivity.permissions"
 import { sourceQueryRules } from "./schemas/source/source.permissions"
-import { subscriptionMutationRules, subscriptionQueryRules } from "./schemas/subscription/subscription.permission"
+import {
+  subscriptionMutationRules,
+  subscriptionQueryRules,
+} from "./schemas/subscription/subscription.permission"
+import { topicQueryRules } from "./schemas/topic/topic.permission"
 import {
   userMutationRules,
   userQueryRules,
@@ -23,13 +27,14 @@ export const permissions = shield(
       ...articleActivityQueryRules,
       ...sourceQueryRules,
       ...subscriptionQueryRules,
+      ...topicQueryRules,
     },
     Mutation: {
       "*": deny,
       ...userMutationRules,
       ...verificationCodeMutationRules,
       ...articleActivityMutationRules,
-      ...subscriptionMutationRules
+      ...subscriptionMutationRules,
     },
   },
   { allowExternalErrors: true }

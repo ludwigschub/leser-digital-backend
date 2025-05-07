@@ -3,12 +3,14 @@ import { hideBin } from "yargs/helpers"
 
 import { seedArticles } from "./seed/article"
 import { seedSources } from "./seed/source"
+import { seedTopics } from "./seed/topic"
 import { seedUsers } from "./seed/user"
 
 const seed = async (testData?: boolean) => {
   await seedUsers()
   const sources = await seedSources()
-  if (testData) await seedArticles(sources[0])
+  const topics = await seedTopics()
+  if (testData) await seedArticles(sources[0], topics[0])
 
   console.log("✅ Finished seeding!")
 }
