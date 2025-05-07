@@ -163,7 +163,7 @@ const getTopics = (): Prisma.TopicCreateInput[] => [
     category: ArticleCategory.FINANCE,
     name: "Finanzen",
     banner:
-      "https://upload.wikimedia.org/wikipedia/commons/c/c4/Frankfurt_Stock_Exchange_%28Ank_Kumar%29_02.jpg",
+      "https://live.staticflickr.com/44/132198746_a2f53e2ee1_b.jpg",
   },
   {
     category: ArticleCategory.AUTOMOTIVE,
