@@ -21,8 +21,7 @@ const getTopics = (): Prisma.TopicCreateInput[] => [
   {
     category: ArticleCategory.BUSINESS,
     name: "Business",
-    banner:
-      "https://upload.wikimedia.org/wikipedia/commons/c/c4/Frankfurt_Stock_Exchange_%28Ank_Kumar%29_02.jpg",
+    banner: "https://live.staticflickr.com/65535/52024579446_74a08ba509_b.jpg",
   },
   {
     category: ArticleCategory.CRIME,
@@ -48,7 +47,7 @@ const getTopics = (): Prisma.TopicCreateInput[] => [
   {
     category: ArticleCategory.ENVIRONMENT,
     name: "Umwelt",
-    banner: "https://live.staticflickr.com/65535/49617793533_7c22206fe6_b.jpg",
+    banner: "https://live.staticflickr.com/2850/11424386506_2a506fd880_b.jpg",
   },
   {
     category: ArticleCategory.FASHION,
@@ -117,7 +116,7 @@ const getTopics = (): Prisma.TopicCreateInput[] => [
   {
     category: ArticleCategory.POLITICS,
     name: "Politik",
-    banner: "https://live.staticflickr.com/65535/51942801840_2acd50b885_b.jpg",
+    banner: "https://live.staticflickr.com/65535/51940467059_28e3937376_b.jpg",
   },
   {
     category: ArticleCategory.PSYCHOLOGY,
@@ -163,7 +162,8 @@ const getTopics = (): Prisma.TopicCreateInput[] => [
   {
     category: ArticleCategory.FINANCE,
     name: "Finanzen",
-    banner: "https://live.staticflickr.com/44/132198746_a2f53e2ee1_b.jpg",
+    banner:
+      "https://upload.wikimedia.org/wikipedia/commons/c/c4/Frankfurt_Stock_Exchange_%28Ank_Kumar%29_02.jpg",
   },
   {
     category: ArticleCategory.AUTOMOTIVE,

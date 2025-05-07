@@ -1,3 +1,4 @@
+import { ArticleCategory } from "@prisma/client"
 import { extendType } from "nexus"
 
 import { Context } from "../../context"
@@ -9,6 +10,7 @@ export const TopicQueries = extendType({
       type: "Topic",
       resolve: async (_parent, _arg, { prisma }: Context) => {
         const allTopics = await prisma.topic.findMany({
+          where: { category: { not: ArticleCategory.UNKNOWN } },
           orderBy: {
             articles: {
               _count: "desc",
