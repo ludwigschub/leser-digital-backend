@@ -69,14 +69,14 @@ model Editor {
 }
 
 model Topic {
-  id            String          @id @default(cuid())
-  name          String
-  banner        String
-  category      ArticleCategory @unique
-  subscriptions Subscription[]
-  articles      Article[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id          String          @id @default(cuid())
+  name        String
+  banner      String
+  category    ArticleCategory @unique
+  subscribers Subscription[]
+  articles    Article[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
 model Subscription {

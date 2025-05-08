@@ -1,5 +1,5 @@
 import { ArticleCategory } from "@prisma/client"
-import { extendType } from "nexus"
+import { extendType, nonNull } from "nexus"
 
 import { Context } from "../../context"
 
@@ -21,6 +21,22 @@ export const TopicQueries = extendType({
           },
         })
         return allTopics.filter((topic) => topic.articles.length > 0)
+      },
+    })
+    t.field("topic", {
+      type: "Topic",
+      args: { category: nonNull("ArticleCategory") },
+      resolve: async (_parent, { category }, { prisma }: Context) => {
+        const topic = await prisma.topic.findUnique({
+          where: { category },
+          include: {
+            articles: true,
+          },
+        })
+        if (!topic) {
+          throw new Error("Topic not found")
+        }
+        return topic
       },
     })
   },

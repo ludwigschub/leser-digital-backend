@@ -11,7 +11,7 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
             {
               source: {
                 id: {
-                  in: subscriptions.map((s) => s.sourceId),
+                  in: subscriptions.map((s) => s.sourceId).filter(Boolean),
                 },
               },
             },
@@ -22,7 +22,7 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
             {
               editors: {
                 id: {
-                  in: subscriptions.map((s) => s.editorId),
+                  in: subscriptions.map((s) => s.editorId).filter(Boolean),
                 },
               },
             },
@@ -33,7 +33,7 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
             {
               topic: {
                 id: {
-                  in: subscriptions.map((s) => s.topicId),
+                  in: subscriptions.map((s) => s.topicId).filter(Boolean),
                 },
               },
             },
@@ -46,7 +46,7 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
 export const articleQueries = extendType({
   type: "Query",
   definition(t) {
-    t.list.nonNull.field("articles", {
+    t.list.nonNull.field("feed", {
       type: "Article",
       args: {
         filter: nullable("ArticleQueryFilter"),
@@ -78,10 +78,34 @@ export const articleQueries = extendType({
             })
           }
         }
-        const { source, editor, category, short } = args.filter ?? {}
+        return await prisma.article.findMany({
+          where: {
+            short: args.filter?.short ?? false,
+          },
+          include: {
+            source: { include: { editors: false } },
+            editors: { include: { source: false } },
+          },
+          orderBy: {
+            uploadedAt: "desc",
+          },
+          take: args.pagination?.limit,
+          skip: args.pagination?.offset,
+        })
+      },
+    })
+    t.list.nonNull.field("articles", {
+      type: "Article",
+      args: {
+        filter: nullable("ArticleQueryFilter"),
+        pagination: "PaginationInput",
+      },
+      resolve: async (_parent, args, { prisma }: Context) => {
+        const { source, editor, topic, category, short } = args.filter ?? {}
         const filter = {
           source: source ? { key: source } : undefined,
           editors: editor ? { some: { name: editor } } : undefined,
+          topic: topic ? { category: topic } : undefined,
           category: category ? { equals: category } : undefined,
           short,
         } as Prisma.ArticleWhereInput
