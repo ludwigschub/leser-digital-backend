@@ -32,6 +32,17 @@ export const Article = objectType({
         })
       },
     })
+    t.field("views", {
+      type: "Int",
+      resolve: async (parent, _args, { prisma }) => {
+        return await prisma.articleActivity.count({
+          where: {
+            articleId: parent.id,
+            type: "VIEW_ARTICLE",
+          },
+        })
+      },
+    })
   },
 })
 
