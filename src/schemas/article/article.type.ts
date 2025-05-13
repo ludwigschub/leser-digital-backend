@@ -3,6 +3,7 @@ import {
   ArticleCategory as ArticleCategoryType,
   Article as ArticleType,
 } from "nexus-prisma"
+import { Context } from "../../context"
 
 export const Article = objectType({
   name: ArticleType.$name,
@@ -23,7 +24,8 @@ export const Article = objectType({
     t.field(ArticleType.updatedAt)
     t.list.nonNull.field("activity", {
       type: nullable("ArticleActivity"),
-      resolve: (parent, _args, { prisma, user }) => {
+      resolve: (parent, _args, { prisma, user }: Context) => {
+        if(!user) return null
         return prisma.articleActivity.findMany({
           where: {
             articleId: parent.id,
