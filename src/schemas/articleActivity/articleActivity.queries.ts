@@ -40,7 +40,7 @@ export const ArticleActivityQueries = extendType({
               })
             )
           })
-        return await Promise.all(
+        return Promise.all(
           readSources.filter(Boolean).map((source) => {
             return prisma.articleActivity
               .count({
@@ -54,7 +54,11 @@ export const ArticleActivityQueries = extendType({
                 views: count,
               }))
           })
-        )
+        ).then((sources) => {
+          return sources.sort((a, b) => {
+            return a.views > b.views ? -1 : 1
+          })
+        })
       },
     })
     t.list.nonNull.field("myTopicActivityStats", {
@@ -77,7 +81,7 @@ export const ArticleActivityQueries = extendType({
               })
             )
           })
-        return await Promise.all(
+        return Promise.all(
           readTopics.filter(Boolean).map((topic) => {
             return prisma.articleActivity
               .count({
@@ -91,7 +95,11 @@ export const ArticleActivityQueries = extendType({
                 views: count,
               }))
           })
-        )
+        ).then((topics) => {
+          return topics.sort((a, b) => {
+            return a.views > b.views ? -1 : 1
+          })
+        })
       },
     })
   },
