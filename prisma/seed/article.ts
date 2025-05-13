@@ -9,7 +9,7 @@ export const getArticles = (
   {
     title: "Example Article",
     description: "Example description",
-    url: "https://example.com",
+    url: "https://example.com/1",
     image: "https://picsum.photos/1000",
     uploadedAt: new Date(),
     source: { connect: { id: source.id } },
@@ -18,7 +18,7 @@ export const getArticles = (
   {
     title: "Example Article 2",
     description: "Example description",
-    url: "https://example.com",
+    url: "https://example.com/2",
     image: "https://picsum.photos/1000",
     uploadedAt: new Date(),
     source: { connect: { id: source.id } },
@@ -27,7 +27,7 @@ export const getArticles = (
   {
     title: "Example Article 3",
     description: "Example description",
-    url: "https://example.com",
+    url: "https://example.com/3",
     image: "https://picsum.photos/1000",
     uploadedAt: new Date(),
     source: { connect: { id: source.id } },
