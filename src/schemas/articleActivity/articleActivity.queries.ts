@@ -5,18 +5,93 @@ import { Context } from "../../context"
 export const ArticleActivityQueries = extendType({
   type: "Query",
   definition(t) {
-    t.field("articleActivity", {
+    t.list.nonNull.field("articleActivity", {
       type: "ArticleActivity",
       args: {
         id: nonNull("String"),
       },
       resolve: async (_parent, { id }, { prisma, user }: Context) => {
+        if (!user) return null
         return await prisma.articleActivity.findFirst({
           where: {
             article: { id },
             user: { id: user?.id },
           },
         })
+      },
+    })
+    t.list.nonNull.field("mySourceActivityStats", {
+      type: "SourceActivityStat",
+      resolve: async (_parent, _args, { prisma, user }: Context) => {
+        if (!user) return null
+        const readSources = await prisma.article
+          .groupBy({
+            by: ["sourceId"],
+            where: {
+              activity: { some: { userId: user?.id } },
+            },
+          })
+          .then((sources) => {
+            return Promise.all(
+              sources.map((source) => {
+                return prisma.source.findUnique({
+                  where: { id: source.sourceId },
+                })
+              })
+            )
+          })
+        return await Promise.all(
+          readSources.filter(Boolean).map((source) => {
+            return prisma.articleActivity
+              .count({
+                where: {
+                  article: { sourceId: source?.id },
+                  user: { id: user?.id },
+                },
+              })
+              .then((count) => ({
+                source,
+                views: count,
+              }))
+          })
+        )
+      },
+    })
+    t.list.nonNull.field("myTopicActivityStats", {
+      type: "TopicActivityStat",
+      resolve: async (_parent, _args, { prisma, user }: Context) => {
+        if (!user) return null
+        const readTopics = await prisma.article
+          .groupBy({
+            by: ["topicId"],
+            where: {
+              activity: { some: { userId: user?.id } },
+            },
+          })
+          .then((topics) => {
+            return Promise.all(
+              topics.map((topic) => {
+                return prisma.topic.findUnique({
+                  where: { id: topic.topicId },
+                })
+              })
+            )
+          })
+        return await Promise.all(
+          readTopics.filter(Boolean).map((topic) => {
+            return prisma.articleActivity
+              .count({
+                where: {
+                  article: { topicId: topic?.id },
+                  user: { id: user?.id },
+                },
+              })
+              .then((count) => ({
+                topic,
+                views: count,
+              }))
+          })
+        )
       },
     })
   },
