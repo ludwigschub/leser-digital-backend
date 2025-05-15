@@ -16,7 +16,7 @@ import {
 const getSources = (): Prisma.SourceCreateInput[] => [
   {
     key: "zeit",
-    name: "ZEIT ONLINE",
+    name: "ZEIT Online",
     logo: "https://upload.wikimedia.org/wikipedia/commons/9/98/Logo_Zeit_Online_2017.svg",
     feeds: ZEIT_RSS_FEEDS,
     banner:
@@ -37,7 +37,7 @@ const getSources = (): Prisma.SourceCreateInput[] => [
     feeds: MANAGER_RSS_FEEDS,
     banner:
       // eslint-disable-next-line max-len
-      "https://cdn.prod.www.manager-magazin.de/images/45cadac4-8169-4559-9228-9e3d290bcf9b_w1920_r1.778_fpx61.4_fpy45.webp",
+      "https://cdn.prod.www.manager-magazin.de/images/218161fa-9142-4c51-8910-f2458c9d313f_w2048_r1.778_fpx62_fpy36.webp",
   },
   {
     key: "tagesschau",
