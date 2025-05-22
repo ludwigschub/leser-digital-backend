@@ -46,6 +46,21 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
 export const articleQueries = extendType({
   type: "Query",
   definition(t) {
+    t.field("article", {
+      type: "Article",
+      args: {
+        id: "String",
+      },
+      resolve: async (_parent, { id }, { prisma }: Context) => {
+        return await prisma.article.findUnique({
+          where: { id },
+          include: {
+            source: { include: { editors: false } },
+            editors: { include: { source: false } },
+          },
+        })
+      },
+    })
     t.list.nonNull.field("feed", {
       type: "Article",
       args: {

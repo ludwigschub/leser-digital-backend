@@ -3,6 +3,7 @@ import {
   ArticleCategory as ArticleCategoryType,
   Article as ArticleType,
 } from "nexus-prisma"
+
 import { Context } from "../../context"
 
 export const Article = objectType({
