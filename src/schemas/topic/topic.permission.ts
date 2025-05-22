@@ -1,5 +1,5 @@
-import { rules } from "../../rules"
+import { allow } from "graphql-shield"
 
 export const topicQueryRules = {
-  topics: rules.isAuthenticated,
+  topics: allow,
 }
