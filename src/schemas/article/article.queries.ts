@@ -204,7 +204,10 @@ export const articleQueries = extendType({
     })
     t.list.nonNull.field("mostViewedArticles", {
       type: "Article",
-      resolve: async (_parent, _args, { prisma }: Context) => {
+      args: {
+        pagination: "PaginationInput",
+      },
+      resolve: async (_parent, args, { prisma }: Context) => {
         const mostViewed = await prisma.article.findMany({
           where: {
             activity: {
@@ -225,6 +228,8 @@ export const articleQueries = extendType({
               _count: "desc",
             },
           },
+          take: args.pagination?.limit,
+          skip: args.pagination?.offset,
         })
 
         return mostViewed
