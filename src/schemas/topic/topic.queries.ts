@@ -20,7 +20,7 @@ export const TopicQueries = extendType({
             articles: true,
           },
         })
-        return allTopics.filter((topic) => topic.articles.length > 0)
+        return allTopics.filter((topic) => topic.articles.length > 2)
       },
     })
     t.field("topic", {
