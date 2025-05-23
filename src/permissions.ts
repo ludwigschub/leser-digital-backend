@@ -6,6 +6,7 @@ import {
   articleActivityMutationRules,
   articleActivityQueryRules,
 } from "./schemas/articleActivity/articleActivity.permissions"
+import { searchQueryRules } from "./schemas/search/search.permissions"
 import { sourceQueryRules } from "./schemas/source/source.permissions"
 import {
   subscriptionMutationRules,
@@ -28,6 +29,7 @@ export const permissions = shield(
       ...sourceQueryRules,
       ...subscriptionQueryRules,
       ...topicQueryRules,
+      ...searchQueryRules
     },
     Mutation: {
       "*": deny,
