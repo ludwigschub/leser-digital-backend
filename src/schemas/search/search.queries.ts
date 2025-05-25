@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client"
+import { ArticleCategory, Prisma } from "@prisma/client"
 import { extendType } from "nexus"
 
 import { Context } from "../../context"
@@ -12,10 +12,13 @@ const getSearchQueryFilter = (query: string) => ({
     ],
   } as Prisma.ArticleWhereInput,
   topics: {
-    OR: [{ name: { contains: query, mode: "insensitive" } }],
+    AND: [
+      { name: { contains: query, mode: "insensitive" } },
+      { category: { not: ArticleCategory.UNKNOWN } },
+    ],
   } as Prisma.TopicWhereInput,
   sources: {
-    OR: [{ name: { contains: query, mode: "insensitive" } }],
+    name: { contains: query, mode: "insensitive" },
   } as Prisma.SourceWhereInput,
 })
 

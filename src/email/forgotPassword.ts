@@ -36,7 +36,7 @@ export async function sendResetLinkMail(
   })
   try {
     await mg.messages.create(domain, {
-      from: `React Application <${sender}>`,
+      from: `leser.digital <${sender}>`,
       to: [`${user.name} <${user.email}>`],
       subject: "Passwort zurücksetzen",
       html: resetPasswordMail(link),

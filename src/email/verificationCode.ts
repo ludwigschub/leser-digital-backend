@@ -20,7 +20,7 @@ export async function sendVerificationCode(
   })
   try {
     await mg.messages.create(domain, {
-      from: `React Application <${sender}>`,
+      from: `leser.digital <${sender}>`,
       to: [`${user.name} <${user.email}>`],
       subject: "Your verification code",
       html: verificationCodeMail(code),
