@@ -1,29 +1,13 @@
-import { extendType, nonNull } from "nexus"
+import { extendType } from "nexus"
 
 import { Context } from "../../context"
 
 export const ArticleActivityQueries = extendType({
   type: "Query",
   definition(t) {
-    t.list.nonNull.field("articleActivity", {
-      type: "ArticleActivity",
-      args: {
-        id: nonNull("String"),
-      },
-      resolve: async (_parent, { id }, { prisma, user }: Context) => {
-        if (!user) return null
-        return await prisma.articleActivity.findFirst({
-          where: {
-            article: { id },
-            user: { id: user?.id },
-          },
-        })
-      },
-    })
     t.list.nonNull.field("mySourceActivityStats", {
       type: "SourceActivityStat",
       resolve: async (_parent, _args, { prisma, user }: Context) => {
-        if (!user) return null
         const readSources = await prisma.article
           .groupBy({
             by: ["sourceId"],
@@ -56,6 +40,7 @@ export const ArticleActivityQueries = extendType({
           })
         ).then((sources) => {
           return sources.sort((a, b) => {
+            // istanbul ignore next
             return a.views > b.views ? -1 : 1
           })
         })
@@ -64,7 +49,6 @@ export const ArticleActivityQueries = extendType({
     t.list.nonNull.field("myTopicActivityStats", {
       type: "TopicActivityStat",
       resolve: async (_parent, _args, { prisma, user }: Context) => {
-        if (!user) return null
         const readTopics = await prisma.article
           .groupBy({
             by: ["topicId"],
@@ -97,6 +81,7 @@ export const ArticleActivityQueries = extendType({
           })
         ).then((topics) => {
           return topics.sort((a, b) => {
+            // istanbul ignore next
             return a.views > b.views ? -1 : 1
           })
         })

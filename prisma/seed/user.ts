@@ -31,9 +31,7 @@ const getUsers = async () => [
 
 export const seedUsers = async () => {
   const users = await getUsers()
-  await Promise.all(
-    users.map(async (user) => {
-      await prisma.user.create({ data: user })
-    })
+  return await Promise.all(
+    users.map(async (user) => await prisma.user.create({ data: user }))
   )
 }

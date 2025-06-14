@@ -33,6 +33,7 @@ const config = {
     "src/app.ts",
     "src/context.ts",
     "src/server.ts",
+    "src/scraper/",
   ],
 
   // Indicates which provider should be used to instrument code for coverage

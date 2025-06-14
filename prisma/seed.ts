@@ -2,15 +2,21 @@ import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
 
 import { seedArticles } from "./seed/article"
+import { seedEditors } from "./seed/editor"
 import { seedSources } from "./seed/source"
+import { seedSubscriptions } from "./seed/subscription"
 import { seedTopics } from "./seed/topic"
 import { seedUsers } from "./seed/user"
 
 const seed = async (testData?: boolean) => {
-  await seedUsers()
+  const users = await seedUsers()
   const sources = await seedSources()
   const topics = await seedTopics()
-  if (testData) await seedArticles(sources[0], topics[0])
+  const editors = await seedEditors(sources[0])
+  if (testData) {
+    await seedArticles(sources[0], topics[0])
+    await seedSubscriptions(sources, topics, editors, users[0])
+  }
 
   console.log("✅ Finished seeding!")
 }

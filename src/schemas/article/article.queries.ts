@@ -3,11 +3,13 @@ import { extendType, nullable } from "nexus"
 
 import { Context } from "../../context"
 
-const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
+export const getArticleSubscriptionsFilter = (
+  subscriptions: Subscription[]
+): Prisma.ArticleWhereInput => {
   return {
     OR: [
       ...(subscriptions.find((s) => s.sourceId)
-        ? [
+        ? ([
             {
               source: {
                 id: {
@@ -15,21 +17,23 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
                 },
               },
             },
-          ]
+          ] as Prisma.ArticleWhereInput[])
         : []),
       ...(subscriptions.find((s) => s.editorId)
-        ? [
+        ? ([
             {
               editors: {
-                id: {
-                  in: subscriptions.map((s) => s.editorId).filter(Boolean),
+                every: {
+                  id: {
+                    in: subscriptions.map((s) => s.editorId).filter(Boolean),
+                  },
                 },
               },
             },
-          ]
+          ] as Prisma.ArticleWhereInput[])
         : []),
       ...(subscriptions.find((s) => s.topicId)
-        ? [
+        ? ([
             {
               topic: {
                 id: {
@@ -37,10 +41,10 @@ const getArticleSubscriptionsFilter = (subscriptions: Subscription[]) => {
                 },
               },
             },
-          ]
+          ] as Prisma.ArticleWhereInput[])
         : []),
     ],
-  } as Prisma.ArticleWhereInput
+  }
 }
 
 export const articleQueries = extendType({
@@ -141,13 +145,7 @@ export const articleQueries = extendType({
     t.list.nonNull.field("savedArticles", {
       type: "Article",
       args: { source: nullable("String") },
-      resolve: async (_parent, args, { prisma, user }: Context) => {
-        const { source } = args ?? {}
-
-        if (!user) {
-          return []
-        }
-
+      resolve: async (_parent, { source }, { prisma, user }: Context) => {
         const activity = await prisma.articleActivity.findMany({
           where: {
             userId: user?.id,
@@ -174,10 +172,6 @@ export const articleQueries = extendType({
       type: "Article",
       args: { source: nullable("String") },
       resolve: async (_parent, { source }, { prisma, user }: Context) => {
-        if (!user) {
-          return []
-        }
-
         const activity = await prisma.articleActivity.findMany({
           where: {
             userId: user?.id,
