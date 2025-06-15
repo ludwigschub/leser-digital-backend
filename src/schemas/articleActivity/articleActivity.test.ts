@@ -1,8 +1,8 @@
 import {
-    ArticleActivity,
-    ArticleActivityType,
-    Source,
-    User,
+  ArticleActivity,
+  ArticleActivityType,
+  Source,
+  User,
 } from "@prisma/client"
 
 import { executeQuery } from "../../../test/helpers"
@@ -51,7 +51,7 @@ describe("Integration test for article activity methods", () => {
     })
   })
 
-  test("createArticleActivity", async () => {
+  test("should create an activity", async () => {
     const article = await prisma.article.findFirst()
     const data = {
       type: ArticleActivityType.VIEW_ARTICLE,
@@ -67,7 +67,7 @@ describe("Integration test for article activity methods", () => {
     ).toBeDefined()
   })
 
-  test("mySourceActivityStats", async () => {
+  test("should show activity statistics for sources", async () => {
     const response = await executeQuery(
       mySourceActivityStats,
       {},
@@ -84,7 +84,7 @@ describe("Integration test for article activity methods", () => {
     ).toBeTruthy()
   })
 
-  test("myTopicActivityStats", async () => {
+  test("should show activity statistics for topics", async () => {
     const response = await executeQuery(
       myTopicActivityStats,
       {},
@@ -101,7 +101,7 @@ describe("Integration test for article activity methods", () => {
     ).toBeTruthy()
   })
 
-  test("deleteArticleActivity", async () => {
+  test("should delete an activity", async () => {
     const articleActivity = await prisma.articleActivity.findFirst()
     const response = await executeQuery(
       deleteArticleActivityMutation,
