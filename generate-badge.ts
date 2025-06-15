@@ -6,7 +6,7 @@ const summary = JSON.parse(
 const pct = summary.total.lines.pct
 
 let color = "red"
-if (pct >= 90) color = "brightgreen"
+if (pct >= 90) color = "limegreen"
 else if (pct >= 75) color = "yellow"
 else if (pct >= 60) color = "orange"
 
