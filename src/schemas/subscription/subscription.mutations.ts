@@ -1,7 +1,6 @@
 import { extendType } from "nexus"
 
 import { Context } from "../../context"
-import { UserNotLoggedInError } from "../user/user.errors"
 
 export const SubscriptionMutations = extendType({
   type: "Mutation",
@@ -18,15 +17,12 @@ export const SubscriptionMutations = extendType({
         { sourceId, editorId, topicId },
         { prisma, user }: Context
       ) => {
-        if (!user) {
-          throw UserNotLoggedInError
-        }
         if (!sourceId && !editorId && !topicId) {
           throw new Error("At least one argument is required")
         }
         return await prisma.subscription.create({
           data: {
-            user: { connect: { id: user.id } },
+            user: { connect: { id: user?.id } },
             source: sourceId ? { connect: { id: sourceId } } : undefined,
             editor: editorId ? { connect: { id: editorId } } : undefined,
             topic: topicId ? { connect: { id: topicId } } : undefined,
@@ -40,11 +36,8 @@ export const SubscriptionMutations = extendType({
         id: "String",
       },
       resolve: async (_parent, { id }, { prisma, user }: Context) => {
-        if (!user) {
-          throw UserNotLoggedInError
-        }
         return await prisma.subscription.delete({
-          where: { id, userId: user.id },
+          where: { id, userId: user?.id },
         })
       },
     })
