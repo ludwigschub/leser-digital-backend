@@ -99,9 +99,13 @@ describe("Integration test for user methods", () => {
     expect(response.data?.loggedIn).toHaveProperty("email", "test@example.com")
     expect(response.data?.loggedIn).toHaveProperty("name")
   })
-  
+
   test("loggedIn query should return an error if not logged in", async () => {
-    const response = await executeQuery(loggedInQuery, {}, "notLoggedIn@example.com")
+    const response = await executeQuery(
+      loggedInQuery,
+      {},
+      "notLoggedIn@example.com"
+    )
 
     expect(response.errors?.at(0)?.message).toBe("Not logged in")
     expect(response.errors?.at(0)?.extensions.code).toBe("NOT_LOGGED_IN")
@@ -149,11 +153,11 @@ describe("Integration test for user methods", () => {
 
   test("should throw an error for refreshing tokens with invalid token", async () => {
     const response = await executeQuery(refreshTokenMutation, {}, undefined, {
-      forInvalidRefreshToken: "test@example.com",
+      forInvalidRefreshToken: true,
     })
 
     expect(response.errors?.at(0)?.message).toBe(
-      "Invalid or expired refresh token"
+      "Invalid refresh token"
     )
     expect(response.errors?.at(0)?.extensions.code).toBe(
       "INVALID_REFRESH_TOKEN"
@@ -163,6 +167,18 @@ describe("Integration test for user methods", () => {
   test("should throw an error for refreshing tokens without token", async () => {
     const response = await executeQuery(refreshTokenMutation)
 
+    expect(response.errors?.at(0)?.message).toBe(
+      "Invalid or expired refresh token"
+    )
+    expect(response.errors?.at(0)?.extensions.code).toBe(
+      "INVALID_REFRESH_TOKEN"
+    )
+  })
+
+  test("should throw an error for refreshing tokens with expired token", async () => {
+    const response = await executeQuery(refreshTokenMutation, {}, undefined, {
+      forExpiredRefreshToken: "test@example.com",
+    })
     expect(response.errors?.at(0)?.message).toBe(
       "Invalid or expired refresh token"
     )
@@ -226,12 +242,9 @@ describe("Integration test for user methods", () => {
 
   test("resetPassword mutation should throw error for expired token", async () => {
     const response = await executeQuery(resetPasswordMutation, {
-      token: jwt.sign(
-        { email: "test@example.com" },
-        process.env.JWT_SECRET!, {
-          expiresIn: 0,
-        }
-      ),
+      token: jwt.sign({ email: "test@example.com" }, process.env.JWT_SECRET!, {
+        expiresIn: 0,
+      }),
       password: "newPassword",
     })
 
@@ -240,12 +253,13 @@ describe("Integration test for user methods", () => {
       "INVALID_OR_EXPIRED_TOKEN"
     )
   })
-  
+
   test("resetPassword mutation should throw error for invalid email", async () => {
     const response = await executeQuery(resetPasswordMutation, {
       token: jwt.sign(
         { email: "invalid@example.com" },
-        process.env.JWT_SECRET!, {
+        process.env.JWT_SECRET!,
+        {
           expiresIn: "1h",
         }
       ),
@@ -253,9 +267,7 @@ describe("Integration test for user methods", () => {
     })
 
     expect(response.errors?.at(0)?.message).toBe("User not found")
-    expect(response.errors?.at(0)?.extensions.code).toBe(
-      "USER_NOT_FOUND"
-    )
+    expect(response.errors?.at(0)?.extensions.code).toBe("USER_NOT_FOUND")
   })
 
   test("register mutation should register the user", async () => {
@@ -309,7 +321,7 @@ describe("Integration test for user methods", () => {
 
     expect(response.errors?.at(0)?.message).toBe("Not Authorised!")
   })
-  
+
   test("users query should return all users if admin", async () => {
     const users = await prisma.user.findMany()
     const response = await executeQuery(usersQuery, {}, "admin@example.com")

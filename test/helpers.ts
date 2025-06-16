@@ -1,5 +1,6 @@
 import { ExecutionResult, graphql } from "graphql"
 import { applyMiddleware } from "graphql-middleware"
+import jwt from "jsonwebtoken"
 
 import { permissions } from "../src/permissions"
 import prisma from "../src/prismaClient"
@@ -21,7 +22,12 @@ export async function executeQuery(
   {
     forRefreshToken,
     forInvalidRefreshToken,
-  }: { forRefreshToken?: string; forInvalidRefreshToken?: string } = {}
+    forExpiredRefreshToken,
+  }: {
+    forRefreshToken?: string
+    forInvalidRefreshToken?: boolean
+    forExpiredRefreshToken?: string
+  } = {}
 ): Promise<ExecutionResult> {
   let user = null
   let refreshToken = null
@@ -32,7 +38,13 @@ export async function executeQuery(
       await prisma.user.findUnique({ where: { email: forRefreshToken } })
     )?.refreshToken[0]
   } else if (forInvalidRefreshToken) {
-    refreshToken = "asdf"
+    refreshToken = jwt.sign({ email: "asdf" }, process.env.JWT_SECRET!, {
+      expiresIn: "1m",
+    })
+  } else if (forExpiredRefreshToken) {
+    refreshToken = jwt.sign({ email: "asdf" }, process.env.JWT_SECRET!, {
+      expiresIn: "0s",
+    })
   } else if (userEmail) {
     user = await prisma.user.findUnique({ where: { email: userEmail } })
   }

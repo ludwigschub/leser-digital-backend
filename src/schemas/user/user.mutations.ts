@@ -151,21 +151,11 @@ export const UserMutations = objectType({
           email: string
           exp: number
         } | null
-        const expired = isCodeExpired((decoded?.exp || 0) * 1000)
-        if (expired || !decoded?.email) {
-          // istanbul ignore next-line
-          if (res) {
-            res.clearCookie("refresh_token")
-          }
-          throw new GraphQLError("Invalid or expired refresh token", {
-            extensions: { code: "INVALID_REFRESH_TOKEN" },
-          })
-        }
-
         const user = await prisma.user.findFirst({
           where: { email: decoded?.email },
         })
         if (!user?.refreshToken.find((token) => token === refreshTokenHash)) {
+          // istanbul ignore next-line
           if (res) {
             res.clearCookie("refresh_token")
           }
@@ -197,7 +187,9 @@ export const UserMutations = objectType({
           data: {
             accessToken,
             refreshToken: [
-              ...user.refreshToken.filter((token) => token !== refreshTokenHash),
+              ...user.refreshToken.filter(
+                (token) => token !== refreshTokenHash
+              ),
               newRefreshToken,
             ],
           },
