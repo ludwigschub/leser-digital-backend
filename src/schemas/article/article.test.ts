@@ -15,6 +15,7 @@ describe("Integration test for article methods", () => {
       query mostViewedArticles {
         mostViewedArticles {
           id
+          title
         }
       }
     `
@@ -111,6 +112,19 @@ describe("Integration test for article methods", () => {
     await prisma.article.update({
       where: { id: firstArticle!.id },
       data: { recommended: true },
+    })
+  })
+
+  afterAll(async () => {
+    await prisma.articleActivity.deleteMany({
+      where: {
+        articleId: firstArticle?.id,
+        userId: firstExampleUser?.id,
+      },
+    })
+    await prisma.article.update({
+      where: { id: firstArticle?.id },
+      data: { recommended: false },
     })
   })
 
@@ -226,11 +240,23 @@ describe("Integration test for article methods", () => {
 
   test("mostViewedArticles should return most viewed articles", async () => {
     const response = await executeQuery(mostViewedArticlesQuery, {})
+    const articles = await prisma.article.findMany({
+      include: { activity: true },
+    })
+    const sortedArticles = articles.sort((a, b) => {
+      const aViews = a.activity.filter(
+        (activity) => activity.type === ArticleActivityType.VIEW_ARTICLE
+      ).length
+      const bViews = b.activity.filter(
+        (activity) => activity.type === ArticleActivityType.VIEW_ARTICLE
+      ).length
+      return bViews - aViews
+    })
     expect((response.data?.mostViewedArticles as Article[])[0]?.id).toBe(
-      firstArticle?.id
+      sortedArticles[0]?.id
     )
     expect((response.data?.mostViewedArticles as Article[])[1]?.id).toBe(
-      secondArticle?.id
+      sortedArticles[1]?.id
     )
   })
 })
