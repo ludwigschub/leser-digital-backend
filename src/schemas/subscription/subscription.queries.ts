@@ -8,9 +8,6 @@ export const SubscriptionQueries = extendType({
     t.list.nonNull.field("subscriptions", {
       type: "Subscription",
       resolve: async (_parent, _args, { prisma, user }: Context) => {
-        if (!user) {
-          return []
-        }
         return await prisma.subscription.findMany({
           where: { userId: user?.id },
           orderBy: { createdAt: "desc" },

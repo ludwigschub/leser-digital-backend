@@ -1,5 +1,6 @@
 import { Subscription, User } from "@prisma/client"
 import { GraphQLError } from "graphql"
+
 import { executeQuery } from "../../../test/helpers"
 import prisma from "../../prismaClient"
 
@@ -18,6 +19,14 @@ describe("Integration test for subscription methods", () => {
       }
     }
 `
+  const subscriptionsQuery = `
+    query subscriptions {
+      subscriptions {
+        id
+      }
+    }
+`
+
   let firstExampleUser: User | null
   beforeAll(async () => {
     firstExampleUser = await prisma.user.findFirst({
@@ -78,5 +87,20 @@ describe("Integration test for subscription methods", () => {
       firstExampleUser?.email
     )
     expect((result.data?.deleteSubscription as Subscription)?.id).toBeDefined()
+  })
+
+  test("should get all subscriptions for a user", async () => {
+    const subscriptions = await prisma.subscription.findMany({
+      where: { user: { email: firstExampleUser?.email } },
+    })
+    const response = await executeQuery(
+      subscriptionsQuery,
+      {},
+      firstExampleUser?.email
+    )
+    expect(response.data?.subscriptions).toBeDefined()
+    expect((response.data?.subscriptions as Subscription[])?.length).toBe(
+      subscriptions.length
+    )
   })
 })
