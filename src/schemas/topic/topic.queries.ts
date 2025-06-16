@@ -33,9 +33,6 @@ export const TopicQueries = extendType({
             articles: true,
           },
         })
-        if (!topic) {
-          throw new Error("Topic not found")
-        }
         return topic
       },
     })
