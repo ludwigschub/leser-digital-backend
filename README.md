@@ -48,4 +48,4 @@ yarn test
         - [TYPE].type.ts
         - [TYPE].test.ts
 ```
-And after adding a new type and its queries, mutations and permissions, update [`src/graphql/schemas/index.ts`](https://github.com/ludwigschub/fullstack-backend-template/blob/main/src/graphql/schemas/index.ts) and [`src/permission.ts`](https://github.com/ludwigschub/fullstack-backend-template/blob/main/src/graphql/permission.ts)
+After adding a new type, update [`src/graphql/schemas/index.ts`](https://github.com/ludwigschub/fullstack-backend-template/blob/main/src/graphql/schemas/index.ts) and [`src/permission.ts`](https://github.com/ludwigschub/fullstack-backend-template/blob/main/src/graphql/permission.ts) for it's permissions.
