@@ -1,6 +1,5 @@
 import { deny, shield } from "graphql-shield"
 
-import { rules } from "./rules"
 import { articleQueryRules } from "./schemas/article/article.permissions"
 import {
   articleActivityMutationRules,
@@ -22,7 +21,7 @@ import { verificationCodeMutationRules } from "./schemas/verificationCode/verifi
 export const permissions = shield(
   {
     Query: {
-      "*": rules.isAuthenticated,
+      "*": deny,
       ...userQueryRules,
       ...articleQueryRules,
       ...articleActivityQueryRules,
