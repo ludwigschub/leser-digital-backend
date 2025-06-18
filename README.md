@@ -3,7 +3,7 @@ Express application using TypeScript, [Prisma](https://www.prisma.io/), [GraphQL
 
 ![coverage](./badges/coverage.svg)
 
-**For more detailed documentation check the [Wiki](https://github.com/ludwigschub/leser-digital-backend/wiki).**
+**For more detailed documentation and info check the [Wiki](https://github.com/ludwigschub/leser-digital-backend/wiki).**
 
 ## Installation
 
