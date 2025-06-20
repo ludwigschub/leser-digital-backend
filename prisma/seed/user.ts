@@ -1,16 +1,12 @@
-import crypto from "crypto"
+import { Role } from "@prisma/client";
+import bcrypt from "bcrypt";
 
-import { Role } from "@prisma/client"
-
-import prisma from "../../src/prismaClient"
+import prisma from "../../src/prismaClient";
 
 export const hashPassword = async (password: string) => {
-  const passwordHash = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(password)
-  )
-  return Buffer.from(passwordHash).toString("base64")
-}
+  const saltRounds = 12;
+  return await bcrypt.hash(password, saltRounds);
+};
 
 const getUsers = async () => [
   {
