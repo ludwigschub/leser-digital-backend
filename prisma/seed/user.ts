@@ -1,12 +1,7 @@
 import { Role } from "@prisma/client";
-import bcrypt from "bcrypt";
 
+import { hashPassword } from "../../src/password";
 import prisma from "../../src/prismaClient";
-
-export const hashPassword = async (password: string) => {
-  const saltRounds = 12;
-  return await bcrypt.hash(password, saltRounds);
-};
 
 const getUsers = async () => [
   {
