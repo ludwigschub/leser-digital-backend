@@ -6,7 +6,7 @@ import { nonNull, objectType } from "nexus"
 import { Context, isCodeExpired } from "../../context"
 import { sendResetLink } from "../../email/forgotPassword"
 import { sendVerificationCode } from "../../email/verificationCode"
-import { hashPassword } from "../../password"
+import { checkPassword, hashPassword } from "../../password"
 import { checkCodeExpiry, createCode } from "../verificationCode"
 
 // istanbul ignore next
@@ -84,10 +84,13 @@ export const UserMutations = objectType({
         const user = await prisma.user.findUnique({
           where: {
             email,
-            password: await hashPassword(password),
           },
         })
-        if (!user) {
+        const isValidPassword = await checkPassword(
+          password,
+          user?.password as string
+        )
+        if (!user || !isValidPassword) {
           throw new GraphQLError("Invalid credentials", {
             extensions: { code: "INVALID_CREDENTIALS" },
           })
