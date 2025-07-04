@@ -6,6 +6,7 @@ import {
   articleActivityQueryRules,
 } from "./schemas/articleActivity/articleActivity.permissions"
 import { searchQueryRules } from "./schemas/search/search.permissions"
+import { searchTermMutationRules, searchTermQueryRules } from "./schemas/searchTerm/searchTerm.permissions"
 import { sourceQueryRules } from "./schemas/source/source.permissions"
 import {
   subscriptionMutationRules,
@@ -28,7 +29,8 @@ export const permissions = shield(
       ...sourceQueryRules,
       ...subscriptionQueryRules,
       ...topicQueryRules,
-      ...searchQueryRules
+      ...searchQueryRules,
+      ...searchTermQueryRules
     },
     Mutation: {
       "*": deny,
@@ -36,6 +38,7 @@ export const permissions = shield(
       ...verificationCodeMutationRules,
       ...articleActivityMutationRules,
       ...subscriptionMutationRules,
+      ...searchTermMutationRules
     },
   },
   { allowExternalErrors: true }

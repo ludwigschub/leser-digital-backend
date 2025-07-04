@@ -23,9 +23,13 @@ export const SubscriptionMutations = extendType({
         return await prisma.subscription.create({
           data: {
             user: { connect: { id: user?.id } },
-            source: sourceId ? { connect: { id: sourceId } } : undefined,
-            editor: editorId ? { connect: { id: editorId } } : undefined,
-            topic: topicId ? { connect: { id: topicId } } : undefined,
+            searchTerm: {
+              create: {
+                source: sourceId ? { connect: { id: sourceId } } : undefined,
+                editor: editorId ? { connect: { id: editorId } } : undefined,
+                topic: topicId ? { connect: { id: topicId } } : undefined,
+              },
+            },
           },
         })
       },

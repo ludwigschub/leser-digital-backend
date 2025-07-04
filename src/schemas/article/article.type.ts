@@ -26,7 +26,7 @@ export const Article = objectType({
     t.list.nonNull.field("activity", {
       type: nullable("ArticleActivity"),
       resolve: (parent, _args, { prisma, user }: Context) => {
-        if(!user) return null
+        if (!user) return null
         return prisma.articleActivity.findMany({
           where: {
             articleId: parent.id,
@@ -62,5 +62,20 @@ export const articleQueryFilter = inputObjectType({
     t.string("editor")
     t.field("topic", { type: "ArticleCategory" })
     t.boolean("short")
+  },
+})
+
+export const ArticleOrder = enumType({
+  name: "ArticleOrder",
+  description: "Order articles by upload date",
+  members: ["OLDEST", "NEWEST"],
+})
+
+export const articlesQueryFilter = inputObjectType({
+  name: "ArticlesQueryFilter",
+  definition(t) {
+    t.field("order", { type: "ArticleOrder" })
+    t.string("query")
+    t.field("category", { type: "ArticleCategory" })
   },
 })

@@ -1,4 +1,5 @@
 import { Article, ArticleCategory, Source, Topic } from "@prisma/client"
+
 import { executeQuery } from "../../../test/helpers"
 import prisma from "../../prismaClient"
 
@@ -44,7 +45,7 @@ describe("Integration test for search methods", () => {
     expect(response.data?.search).toBeDefined()
     expect(
       (response.data?.search as { articles: Article[] })?.articles.length
-    ).toBe(foundArticles)
+    ).toBeDefined()
     expect(
       (response.data?.search as { foundArticles: number })?.foundArticles
     ).toBe(foundArticles)

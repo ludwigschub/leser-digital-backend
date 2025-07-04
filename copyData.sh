@@ -1,0 +1,8 @@
+psql $1 -c 'TRUNCATE TABLE "Topic" RESTART IDENTITY CASCADE;'
+psql $1 -c '\COPY "Topic" FROM datadump/topics.csv WITH CSV HEADER'
+psql $1 -c 'TRUNCATE TABLE "Source" RESTART IDENTITY CASCADE;'
+psql $1 -c '\COPY "Source" FROM datadump/sources.csv WITH CSV HEADER'
+psql $1 -c 'TRUNCATE TABLE "Editor" RESTART IDENTITY CASCADE;'
+psql $1 -c '\COPY "Editor" FROM datadump/editors.csv WITH CSV HEADER'
+psql $1 -c 'TRUNCATE TABLE "Article" RESTART IDENTITY CASCADE;'
+psql $1 -c '\COPY "Article" FROM datadump/articles.csv WITH CSV HEADER'

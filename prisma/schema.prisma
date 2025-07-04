@@ -44,53 +44,51 @@ enum Role {
 }
 
 model Source {
-  id          String         @id @default(cuid())
-  key         String         @unique
-  name        String
-  logo        String
-  banner      String
-  feeds       String[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  articles    Article[]
-  editors     Editor[]
-  subscribers Subscription[]
+  id            String              @id @default(cuid())
+  key           String              @unique
+  name          String
+  logo          String
+  banner        String
+  feeds         String[]
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  articles      Article[]
+  editors       Editor[]
+  searchTerms   SearchTerm[]
+  searchRanking SearchTermRanking[]
 }
 
 model Editor {
-  id          String         @id @default(cuid())
+  id          String       @id @default(cuid())
   name        String
   sourceId    String
-  source      Source         @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  source      Source       @relation(fields: [sourceId], references: [id], onDelete: Cascade)
   articles    Article[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  subscribers Subscription[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  searchTerms SearchTerm[]
 }
 
 model Topic {
-  id          String          @id @default(cuid())
-  name        String
-  banner      String
-  category    ArticleCategory @unique
-  subscribers Subscription[]
-  articles    Article[]
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id            String              @id @default(cuid())
+  name          String
+  banner        String
+  category      ArticleCategory     @unique
+  articles      Article[]
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  searchTerms   SearchTerm[]
+  searchRanking SearchTermRanking[]
 }
 
 model Subscription {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sourceId  String?
-  source    Source?  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  topicId   String?
-  topic     Topic?   @relation(fields: [topicId], references: [id])
-  editorId  String?
-  editor    Editor?  @relation(fields: [editorId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  searchTerm   SearchTerm @relation(fields: [searchTermId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  searchTermId String
 }
 
 model Article {
@@ -112,6 +110,7 @@ model Article {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   activity    ArticleActivity[]
+  ranking     ArticleRanking?
 }
 
 enum ArticleCategory {
@@ -164,4 +163,46 @@ model ArticleActivity {
   user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   articleId String
   article   Article             @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
+
+model SearchTerm {
+  id               String             @id @default(cuid())
+  active           Boolean            @default(true)
+  term             String?
+  sourceId         String?
+  source           Source?            @relation(fields: [sourceId], references: [id])
+  editorId         String?
+  editor           Editor?            @relation(fields: [editorId], references: [id])
+  topicId          String?
+  topic            Topic?             @relation(fields: [topicId], references: [id])
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  rankingId        String?
+  ranking          SearchTermRanking?
+  subscriptions    Subscription[]
+  articleRanking   ArticleRanking[]
+  articleRankingId String[]
+}
+
+model SearchTermRanking {
+  id           String     @id @default(cuid())
+  searchTermId String     @unique
+  searchTerm   SearchTerm @relation(fields: [searchTermId], references: [id])
+  mentions     Int        @default(0)
+  forSourceId  String?
+  forSource    Source?    @relation(fields: [forSourceId], references: [id])
+  forTopicId   String?
+  forTopic     Topic?     @relation(fields: [forTopicId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model ArticleRanking {
+  id          String       @id @default(cuid())
+  articleId   String       @unique
+  article     Article      @relation(fields: [articleId], references: [id])
+  mentions    Int          @default(0)
+  searchTerms SearchTerm[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }

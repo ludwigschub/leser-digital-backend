@@ -6,9 +6,7 @@ export const Subscription = objectType({
   description: SubscriptionType.$description,
   definition(t) {
     t.field(SubscriptionType.id)
-    t.field(SubscriptionType.source)
-    t.field(SubscriptionType.editor)
-    t.field(SubscriptionType.topic)
+    t.field(SubscriptionType.searchTerm)
     t.field(SubscriptionType.createdAt)
     t.field(SubscriptionType.updatedAt)
   },

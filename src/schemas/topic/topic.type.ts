@@ -15,7 +15,7 @@ export const Topic = objectType({
       type: "Int",
       resolve: async (parent, _arg, { prisma }: Context) => {
         return await prisma.subscription.count({
-          where: { topicId: parent.id },
+          where: { searchTerm: { topicId: parent.id } },
         })
       },
     })
@@ -26,7 +26,7 @@ export const Topic = objectType({
           return null
         }
         const subscription = await prisma.subscription.findFirst({
-          where: { userId: user.id, topicId: parent.id },
+          where: { userId: user.id, searchTerm: { topicId: parent.id } },
         })
         return subscription
       },

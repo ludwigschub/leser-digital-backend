@@ -5,3 +5,4 @@ generated
 .env
 yarn-error.log
 debug.log
+datadump/*.csv

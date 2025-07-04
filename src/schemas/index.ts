@@ -11,6 +11,7 @@ export * from "./subscription"
 export * from "./topic"
 
 export * from "./search"
+export * from "./searchTerm"
 
 export const PaginationInput = inputObjectType({
   name: "PaginationInput",

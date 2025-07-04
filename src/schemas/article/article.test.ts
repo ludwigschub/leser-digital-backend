@@ -1,8 +1,9 @@
 import {
-  Article,
-  ArticleActivity,
-  ArticleActivityType,
-  User,
+    Article,
+    ArticleActivity,
+    ArticleActivityType,
+    Topic,
+    User,
 } from "@prisma/client"
 
 import { executeQuery } from "../../../test/helpers"
@@ -11,17 +12,17 @@ import prisma from "../../prismaClient"
 import { getArticleSubscriptionsFilter } from "./article.queries"
 
 describe("Integration test for article methods", () => {
-  const mostViewedArticlesQuery = `
-      query mostViewedArticles {
-        mostViewedArticles {
+  const mostInterestingArticlesQuery = `
+      query mostInterestingArticles {
+        mostInterestingArticles {
           id
           title
         }
       }
     `
   const articlesQuery = `
-      query articles {
-        articles {
+      query articles($filter: ArticleQueryFilter) {
+        articles(filter: $filter) {
           id
         }
       }
@@ -45,15 +46,15 @@ describe("Integration test for article methods", () => {
       }
     `
   const savedArticlesQuery = `
-      query savedArticles {
-        savedArticles {
+      query savedArticles($filter: ArticlesQueryFilter) {
+        savedArticles(filter: $filter) {
           id
         }
       }
     `
   const viewedArticlesQuery = `
-      query viewedArticles {
-        viewedArticles {
+      query viewedArticles($filter: ArticlesQueryFilter) {
+        viewedArticles(filter: $filter) {
           id
         }
       }
@@ -74,6 +75,7 @@ describe("Integration test for article methods", () => {
   beforeAll(async () => {
     firstArticle = await prisma.article.findFirst({
       where: { title: "Example Article" },
+      include: { topic: true },
     })
     secondArticle = await prisma.article.findFirst({
       where: { title: "Example Article 2" },
@@ -128,10 +130,24 @@ describe("Integration test for article methods", () => {
     })
   })
 
-  test("articles should return all articles", async () => {
+  test("articles should not return any articles without a filter", async () => {
     const response = await executeQuery(articlesQuery, {})
-    const articles = await prisma.article.findMany()
-    expect((response.data?.articles as Article[]).length).toBe(articles.length)
+    expect((response.data?.articles as Article[]).length).toBe(0)
+  })
+
+  test("articles should be searchable", async () => {
+    const source = await prisma.source.findFirst({
+      where: { id: firstArticle?.sourceId },
+    })
+    const sourceResponse = await executeQuery(articlesQuery, {
+      filter: { source: source?.key },
+    })
+    const sourceArticles = await prisma.article.findMany({
+      where: { sourceId: firstArticle?.sourceId },
+    })
+    expect((sourceResponse.data?.articles as Article[]).length).toBe(
+      sourceArticles.length
+    )
   })
 
   test("article should return a specific article", async () => {
@@ -167,6 +183,13 @@ describe("Integration test for article methods", () => {
     ).toBeDefined()
   })
 
+  test("feed should return all articles with no user", async () => {
+    const response = await executeQuery(feedQuery, {})
+    const feedArticles = await prisma.article.findMany({take: 10})
+    expect((response.data?.feed as Article[]).length).toBeDefined()
+    expect((response.data?.feed as Article[]).length).toBe(feedArticles.length)
+  })
+
   test("feed should return articles for the user", async () => {
     const response = await executeQuery(feedQuery, {}, firstExampleUser?.email)
     const userSubscriptions = await prisma.subscription.findMany({
@@ -191,17 +214,6 @@ describe("Integration test for article methods", () => {
     )
   })
 
-  test("savedArticles should return saved articles", async () => {
-    const response = await executeQuery(
-      savedArticlesQuery,
-      {},
-      firstExampleUser?.email
-    )
-    expect((response.data?.savedArticles as Article[])[0]?.id).toBe(
-      firstArticle?.id
-    )
-  })
-
   test("viewedArticles should return viewed articles", async () => {
     const response = await executeQuery(
       viewedArticlesQuery,
@@ -223,6 +235,177 @@ describe("Integration test for article methods", () => {
       viewedArticles.length
     )
   })
+  test("viewedArticles should be searchable by category", async () => {
+    const categoryFilter = (firstArticle as Article & { topic: Topic }).topic
+      .category
+    const response = await executeQuery(
+      viewedArticlesQuery,
+      {
+        filter: {
+          category: categoryFilter,
+        },
+      },
+      firstExampleUser?.email
+    )
+    const viewedArticles = await prisma.articleActivity
+      .findMany({
+        where: {
+          userId: firstExampleUser?.id,
+          type: ArticleActivityType.VIEW_ARTICLE,
+          article: {
+            topic: {
+              category: categoryFilter,
+            },
+          },
+        },
+        include: { article: true },
+      })
+      .then((activities) => {
+        return activities.map((activity) => activity.article)
+      })
+    expect((response.data?.viewedArticles as Article[]).length).toBe(
+      viewedArticles.length
+    )
+  })
+
+  test("viewedArticles should be searchable by term", async () => {
+    const query = "article 2"
+    const response = await executeQuery(
+      viewedArticlesQuery,
+      {
+        filter: { query },
+      },
+      firstExampleUser?.email
+    )
+    const viewedArticles = await prisma.articleActivity
+      .findMany({
+        where: {
+          userId: firstExampleUser?.id,
+          type: ArticleActivityType.VIEW_ARTICLE,
+          article: {
+            OR: [
+              { title: { contains: query?.trim(), mode: "insensitive" } },
+              {
+                description: {
+                  contains: query?.trim(),
+                  mode: "insensitive",
+                },
+              },
+              {
+                source: {
+                  name: { contains: query?.trim(), mode: "insensitive" },
+                },
+              },
+            ],
+          },
+        },
+        include: { article: true },
+      })
+      .then((activities) => {
+        return activities.map((activity) => activity.article)
+      })
+    expect((response.data?.viewedArticles as Article[]).length).toBeTruthy()
+    expect((response.data?.viewedArticles as Article[]).length).toBe(
+      viewedArticles.length
+    )
+  })
+
+  test("savedArticles should return saved articles", async () => {
+    const response = await executeQuery(
+      savedArticlesQuery,
+      {},
+      firstExampleUser?.email
+    )
+    const savedArticles = await prisma.articleActivity
+      .findMany({
+        where: {
+          userId: firstExampleUser?.id,
+          type: ArticleActivityType.SAVE_ARTICLE,
+        },
+        include: { article: true },
+      })
+      .then((activities) => {
+        return activities.map((activity) => activity.article)
+      })
+    expect((response.data?.savedArticles as Article[]).length).toBe(
+      savedArticles.length
+    )
+  })
+
+  test("savedArticles should be searchable by category", async () => {
+    const categoryFilter = (firstArticle as Article & { topic: Topic }).topic
+      .category
+    const response = await executeQuery(
+      savedArticlesQuery,
+      {
+        filter: {
+          category: categoryFilter,
+        },
+      },
+      firstExampleUser?.email
+    )
+    const savedArticles = await prisma.articleActivity
+      .findMany({
+        where: {
+          userId: firstExampleUser?.id,
+          type: ArticleActivityType.SAVE_ARTICLE,
+          article: {
+            topic: {
+              category: categoryFilter,
+            },
+          },
+        },
+        include: { article: true },
+      })
+      .then((activities) => {
+        return activities.map((activity) => activity.article)
+      })
+    expect((response.data?.savedArticles as Article[]).length).toBe(
+      savedArticles.length
+    )
+  })
+
+  test("savedArticles should be searchable by term", async () => {
+    const query = "article 2"
+    const response = await executeQuery(
+      savedArticlesQuery,
+      {
+        filter: { query },
+      },
+      firstExampleUser?.email
+    )
+    const savedArticles = await prisma.articleActivity
+      .findMany({
+        where: {
+          userId: firstExampleUser?.id,
+          type: ArticleActivityType.SAVE_ARTICLE,
+          article: {
+            OR: [
+              { title: { contains: query?.trim(), mode: "insensitive" } },
+              {
+                description: {
+                  contains: query?.trim(),
+                  mode: "insensitive",
+                },
+              },
+              {
+                source: {
+                  name: { contains: query?.trim(), mode: "insensitive" },
+                },
+              },
+            ],
+          },
+        },
+        include: { article: true },
+      })
+      .then((activities) => {
+        return activities.map((activity) => activity.article)
+      })
+    expect((response.data?.savedArticles as Article[]).length).toBeTruthy()
+    expect((response.data?.savedArticles as Article[]).length).toBe(
+      savedArticles.length
+    )
+  })
 
   test("recommendedArticles should return recommended articles", async () => {
     const response = await executeQuery(
@@ -238,25 +421,35 @@ describe("Integration test for article methods", () => {
     )
   })
 
-  test("mostViewedArticles should return most viewed articles", async () => {
-    const response = await executeQuery(mostViewedArticlesQuery, {})
+  test("mostInterestingArticles should return most viewed articles", async () => {
+    const response = await executeQuery(mostInterestingArticlesQuery, {})
     const articles = await prisma.article.findMany({
-      include: { activity: true },
+      where: {
+        activity: {
+          some: {
+            type: ArticleActivityType.VIEW_ARTICLE,
+          },
+        },
+      },
+      include: {
+        _count: {
+          select: {
+            activity: { where: { type: ArticleActivityType.VIEW_ARTICLE } },
+          },
+        },
+      },
+      orderBy: {
+        activity: {
+          _count: "desc",
+        },
+      },
     })
-    const sortedArticles = articles.sort((a, b) => {
-      const aViews = a.activity.filter(
-        (activity) => activity.type === ArticleActivityType.VIEW_ARTICLE
-      ).length
-      const bViews = b.activity.filter(
-        (activity) => activity.type === ArticleActivityType.VIEW_ARTICLE
-      ).length
-      return bViews - aViews
-    })
-    expect((response.data?.mostViewedArticles as Article[])[0]?.id).toBe(
-      sortedArticles[0]?.id
+
+    expect((response.data?.mostInterestingArticles as Article[])[0]?.id).toBe(
+      articles[0]?.id
     )
-    expect((response.data?.mostViewedArticles as Article[])[1]?.id).toBe(
-      sortedArticles[1]?.id
+    expect((response.data?.mostInterestingArticles as Article[])[1]?.id).toBe(
+      articles[1]?.id
     )
   })
 })

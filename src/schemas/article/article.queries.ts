@@ -1,49 +1,54 @@
-import { ArticleActivityType, Prisma, Subscription } from "@prisma/client"
+import {
+  ArticleActivityType,
+  Prisma,
+  SearchTerm,
+  Subscription,
+} from "@prisma/client"
 import { extendType, nullable } from "nexus"
 
 import { Context } from "../../context"
 
 export const getArticleSubscriptionsFilter = (
-  subscriptions: Subscription[]
+  subscriptions: (Subscription & { searchTerm: SearchTerm })[]
 ): Prisma.ArticleWhereInput => {
   return {
     OR: [
-      ...(subscriptions.find((s) => s.sourceId)
-        ? ([
-            {
-              source: {
+      subscriptions.find((s) => s.searchTerm.sourceId)
+        ? {
+            source: {
+              id: {
+                in: subscriptions
+                  .map((s) => s.searchTerm.sourceId)
+                  .filter(Boolean),
+              },
+            },
+          }
+        : undefined,
+      subscriptions.find((s) => s.searchTerm.editorId)
+        ? {
+            editors: {
+              every: {
                 id: {
-                  in: subscriptions.map((s) => s.sourceId).filter(Boolean),
+                  in: subscriptions
+                    .map((s) => s.searchTerm.editorId)
+                    .filter(Boolean),
                 },
               },
             },
-          ] as Prisma.ArticleWhereInput[])
-        : []),
-      ...(subscriptions.find((s) => s.editorId)
-        ? ([
-            {
-              editors: {
-                every: {
-                  id: {
-                    in: subscriptions.map((s) => s.editorId).filter(Boolean),
-                  },
-                },
+          }
+        : undefined,
+      subscriptions.find((s) => s.searchTerm.topicId)
+        ? {
+            topic: {
+              id: {
+                in: subscriptions
+                  .map((s) => s.searchTerm.topicId)
+                  .filter(Boolean),
               },
             },
-          ] as Prisma.ArticleWhereInput[])
-        : []),
-      ...(subscriptions.find((s) => s.topicId)
-        ? ([
-            {
-              topic: {
-                id: {
-                  in: subscriptions.map((s) => s.topicId).filter(Boolean),
-                },
-              },
-            },
-          ] as Prisma.ArticleWhereInput[])
-        : []),
-    ],
+          }
+        : undefined,
+    ].filter(Boolean) as Prisma.ArticleWhereInput[],
   }
 }
 
@@ -75,6 +80,7 @@ export const articleQueries = extendType({
         if (user) {
           const userSubscriptions = await prisma.subscription.findMany({
             where: { userId: user.id },
+            include: { searchTerm: true },
           })
           if (
             userSubscriptions.length > 0 &&
@@ -108,7 +114,7 @@ export const articleQueries = extendType({
           orderBy: {
             uploadedAt: "desc",
           },
-          take: args.pagination?.limit,
+          take: args.pagination?.limit ?? 10,
           skip: args.pagination?.offset,
         })
       },
@@ -120,13 +126,18 @@ export const articleQueries = extendType({
         pagination: "PaginationInput",
       },
       resolve: async (_parent, args, { prisma }: Context) => {
-        const { source, editor, topic, category, short } = args.filter ?? {}
+        if (!args.filter) {
+          return []
+        }
+        const { source, editor, topic, category, short } = args.filter
         const filter = {
-          source: source ? { key: source } : undefined,
-          editors: editor ? { some: { name: editor } } : undefined,
-          topic: topic ? { category: topic } : undefined,
-          category: category ? { equals: category } : undefined,
-          short,
+          OR: [
+            source ? { source: { key: source } } : undefined,
+            editor ? { editors: { some: { name: editor } } } : undefined,
+            topic ? { topic: { category: topic } } : undefined,
+            category ? { category: { equals: category } } : undefined,
+            short ? { short } : undefined,
+          ].filter(Boolean),
         } as Prisma.ArticleWhereInput
         return await prisma.article.findMany({
           where: filter,
@@ -144,14 +155,38 @@ export const articleQueries = extendType({
     })
     t.list.nonNull.field("savedArticles", {
       type: "Article",
-      args: { source: nullable("String") },
-      resolve: async (_parent, { source }, { prisma, user }: Context) => {
+      args: {
+        filter: nullable("ArticlesQueryFilter"),
+      },
+      resolve: async (_parent, { filter }, { prisma, user }: Context) => {
+        const { query, category } = filter ?? {}
         const activity = await prisma.articleActivity.findMany({
           where: {
             userId: user?.id,
             type: ArticleActivityType.SAVE_ARTICLE,
             article: {
-              source: source ? { key: source } : undefined,
+              topic: category ? { category } : undefined,
+              OR: query
+                ? [
+                    { title: { contains: query?.trim(), mode: "insensitive" } },
+                    {
+                      description: {
+                        contains: query?.trim(),
+                        mode: "insensitive",
+                      },
+                    },
+                    {
+                      source: {
+                        name: { contains: query?.trim(), mode: "insensitive" },
+                      },
+                    },
+                    {
+                      topic: {
+                        name: { contains: query?.trim(), mode: "insensitive" },
+                      },
+                    },
+                  ]
+                : undefined,
             },
           },
           orderBy: {
@@ -170,18 +205,42 @@ export const articleQueries = extendType({
     })
     t.list.nonNull.field("viewedArticles", {
       type: "Article",
-      args: { source: nullable("String") },
-      resolve: async (_parent, { source }, { prisma, user }: Context) => {
+      args: {
+        filter: nullable("ArticlesQueryFilter"),
+      },
+      resolve: async (_parent, { filter }, { prisma, user }: Context) => {
+        const { query, category, order } = filter ?? {}
         const activity = await prisma.articleActivity.findMany({
           where: {
             userId: user?.id,
             type: ArticleActivityType.VIEW_ARTICLE,
             article: {
-              source: source ? { key: source } : undefined,
+              topic: category ? { category } : undefined,
+              OR: query
+                ? [
+                    { title: { contains: query?.trim(), mode: "insensitive" } },
+                    {
+                      description: {
+                        contains: query?.trim(),
+                        mode: "insensitive",
+                      },
+                    },
+                    {
+                      source: {
+                        name: { contains: query?.trim(), mode: "insensitive" },
+                      },
+                    },
+                    {
+                      topic: {
+                        name: { contains: query?.trim(), mode: "insensitive" },
+                      },
+                    },
+                  ]
+                : undefined,
             },
           },
           orderBy: {
-            createdAt: "desc",
+            createdAt: order === "OLDEST" ? "asc" : "desc",
           },
           include: { article: true },
         })
@@ -211,37 +270,77 @@ export const articleQueries = extendType({
         })
       },
     })
-    t.list.nonNull.field("mostViewedArticles", {
+    t.list.nonNull.field("mostInterestingArticles", {
       type: "Article",
       args: {
         pagination: "PaginationInput",
       },
-      resolve: async (_parent, args, { prisma }: Context) => {
-        const mostViewed = await prisma.article.findMany({
+      resolve: async (_parent, args, { prisma, user }: Context) => {
+        const userViewedArticles = await prisma.articleActivity.findMany({
           where: {
-            activity: {
-              some: {
-                type: ArticleActivityType.VIEW_ARTICLE,
-              },
-            },
-          },
-          include: {
-            _count: {
-              select: {
-                activity: { where: { type: ArticleActivityType.VIEW_ARTICLE } },
+            userId: user?.id,
+            type: ArticleActivityType.VIEW_ARTICLE,
+            article: {
+              ranking: {
+                isNot: null,
               },
             },
           },
           orderBy: {
-            activity: {
-              _count: "desc",
+            createdAt: "desc",
+          },
+          include: {
+            article: {
+              include: { ranking: { include: { searchTerms: true } } },
             },
           },
-          take: args.pagination?.limit,
-          skip: args.pagination?.offset,
+          take: args.pagination?.limit ?? 10,
+          skip: args.pagination?.offset ?? 0,
         })
-
-        return mostViewed
+        const userViewedSearchTerms = userViewedArticles.reduce(
+          (activity, current) => {
+            return [
+              ...activity,
+              ...(current.article.ranking?.searchTerms.map((term) => term) ??
+                []),
+            ]
+          },
+          [] as SearchTerm[]
+        )
+        if (userViewedSearchTerms.length > 0) {
+          return await prisma.article.findMany({
+            where: {
+              ranking: {
+                searchTerms: {
+                  some: {
+                    id: {
+                      in: userViewedSearchTerms.map((term) => term.id),
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              },
+            },
+            orderBy: {
+              ranking: {
+                mentions: "desc",
+              },
+            },
+          })
+        } else {
+          return await prisma.article.findMany({
+            where: {
+              ranking: { isNot: null }, // Ensure the article has a ranking
+            },
+            orderBy: {
+              ranking: {
+                mentions: "desc",
+              },
+            },
+            take: args.pagination?.limit ?? 10,
+            skip: args.pagination?.offset ?? 0,
+          })
+        }
       },
     })
   },
