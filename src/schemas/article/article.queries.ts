@@ -314,7 +314,9 @@ export const articleQueries = extendType({
                 searchTerms: {
                   some: {
                     id: {
-                      in: userViewedSearchTerms.map((term) => term.id),
+                      in: userViewedSearchTerms
+                        .filter((term) => term.active)
+                        .map((term) => term.id),
                       mode: "insensitive",
                     },
                   },
@@ -326,6 +328,8 @@ export const articleQueries = extendType({
                 mentions: "desc",
               },
             },
+            take: args.pagination?.limit ?? 10,
+            skip: args.pagination?.offset ?? 0,
           })
         } else {
           return await prisma.article.findMany({

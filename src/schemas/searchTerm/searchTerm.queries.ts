@@ -5,7 +5,7 @@ import { Context } from "../../context"
 export const searchTermQueries = extendType({
   type: "Query",
   definition(t) {
-    t.nonNull.field("searchTerm", {
+    t.field("searchTerm", {
       type: "SearchTerm",
       args: {
         id: "String",
@@ -14,7 +14,11 @@ export const searchTermQueries = extendType({
       resolve: async (_parent, { id, term }, { prisma }: Context) => {
         if (term) {
           return await prisma.searchTerm.findFirst({
-            where: { term: { contains: term, mode: "insensitive" } },
+            where: {
+              term: { startsWith: term, mode: "insensitive" },
+              source: { is: null },
+              topic: { is: null },
+            },
           })
         } else if (id) {
           return await prisma.searchTerm.findUnique({
@@ -63,6 +67,7 @@ export const searchTermQueries = extendType({
         { prisma }: Context
       ) => {
         const searchTerm = await prisma.searchTerm.findMany({
+          distinct: sourceId || topicId ? ["term"] : undefined,
           where: {
             term: query ? { contains: query, mode: "insensitive" } : undefined,
             active: true, // Ensure the search term is active

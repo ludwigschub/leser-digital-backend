@@ -23,6 +23,22 @@ export const Article = objectType({
     t.field(ArticleType.uploadedAt)
     t.field(ArticleType.createdAt)
     t.field(ArticleType.updatedAt)
+    t.list.nonNull.field("keywords", {
+      type: "String",
+      resolve: (parent, _args, { prisma }: Context) => {
+        return prisma.searchTerm
+          .findMany({
+            distinct: ["term"],
+            where: {
+              articleRanking: { some: { articleId: parent.id } },
+              active: true,
+            },
+            orderBy: { ranking: { mentions: "desc" } },
+            take: 4,
+          })
+          .then((terms) => terms.map((term) => term.term))
+      },
+    })
     t.list.nonNull.field("activity", {
       type: nullable("ArticleActivity"),
       resolve: (parent, _args, { prisma, user }: Context) => {

@@ -26,6 +26,9 @@ import { rankSearchTerms } from "./rankSearchTerms"
         source: true,
         topic: true,
       },
+      orderBy: {
+        createdAt: "desc", // Order by most recent articles first
+      },
     })
   } else {
     // Only learn search terms for articles created in the last 24 hours

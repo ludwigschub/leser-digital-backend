@@ -9,26 +9,30 @@ export const SubscriptionMutations = extendType({
       type: "Subscription",
       args: {
         sourceId: "String",
-        editorId: "String",
+        termId: "String",
         topicId: "String",
       },
       resolve: async (
         _parent,
-        { sourceId, editorId, topicId },
+        { sourceId, termId, topicId },
         { prisma, user }: Context
       ) => {
-        if (!sourceId && !editorId && !topicId) {
+        if (!sourceId && !termId && !topicId) {
           throw new Error("At least one argument is required")
         }
         return await prisma.subscription.create({
           data: {
             user: { connect: { id: user?.id } },
             searchTerm: {
-              create: {
-                source: sourceId ? { connect: { id: sourceId } } : undefined,
-                editor: editorId ? { connect: { id: editorId } } : undefined,
-                topic: topicId ? { connect: { id: topicId } } : undefined,
-              },
+              connect: termId ? { id: termId } : undefined,
+              create: termId
+                ? undefined
+                : {
+                    source: sourceId
+                      ? { connect: { id: sourceId } }
+                      : undefined,
+                    topic: topicId ? { connect: { id: topicId } } : undefined,
+                  },
             },
           },
         })

@@ -34,5 +34,15 @@ export const SearchTerm = objectType({
         })
       },
     })
+    t.nullable.field("isSubscribed", {
+      type: "Subscription",
+      resolve: async (parent, _arg, { prisma, user }: Context) => {
+        if (!user) return false
+        const subscription = await prisma.subscription.findFirst({
+          where: { searchTermId: parent.id, userId: user.id },
+        })
+        return subscription
+      },
+    })
   },
 })

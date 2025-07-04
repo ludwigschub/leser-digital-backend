@@ -87,7 +87,7 @@ export const searchQueries = extendType({
             where: queryFilter.articles,
             take: pagination?.limit || 10,
             skip: pagination?.offset || 0,
-            orderBy: { ranking: { mentions: "desc" } },
+            orderBy: { createdAt: "desc" },
           }),
           foundArticles: await prisma.article.count({
             where: queryFilter.articles,

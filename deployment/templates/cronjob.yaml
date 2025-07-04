@@ -12,7 +12,7 @@ spec:
           containers:
             - name: scraper
               image: "{{ .Values.cronjob.image.repository }}:{{ .Values.cronjob.image.tag }}"
-              command: ["yarn", "scraper"]
+              command: ["yarn", "scraper", "&&", "yarn", "search:learn"]
               env:
                 - name: DATABASE_URL
                   valueFrom:
