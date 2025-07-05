@@ -37,9 +37,14 @@ export const learnSearchTerms = async ({
     if (!term || term.length < 1) {
       continue
     }
+    const isShortTerm = term.length <= 3
 
     const existingTerm = await prisma.searchTerm.findFirst({
-      where: { term: term },
+      where: {
+        term: { in: [term], mode: "insensitive" },
+        sourceId: null,
+        topicId: null,
+      },
       include: { ranking: true },
     })
     if (existingTerm) {
@@ -53,6 +58,7 @@ export const learnSearchTerms = async ({
         const createdTerm = await prisma.searchTerm.create({
           data: {
             term: term,
+            active: !isShortTerm, // Terms shorter than 3 characters need to be activated manually
           },
         })
         newTerms.push(createdTerm)
@@ -60,7 +66,10 @@ export const learnSearchTerms = async ({
     }
     // Index term for topic search
     const existingTopicTerm = await prisma.searchTerm.findFirst({
-      where: { term: term, topicId: article?.topicId },
+      where: {
+        term: { in: [term], mode: "insensitive" },
+        topicId: article?.topicId,
+      },
       include: { ranking: true },
     })
     if (existingTopicTerm) {
@@ -77,6 +86,7 @@ export const learnSearchTerms = async ({
           data: {
             term: term,
             topicId: article?.topicId,
+            active: !isShortTerm, // Terms shorter than 3 characters need to be activated manually
           },
         })
         newTerms.push(createdTerm)
@@ -84,7 +94,10 @@ export const learnSearchTerms = async ({
     }
     // Index term for source search
     const existingSourceTerm = await prisma.searchTerm.findFirst({
-      where: { term: term, sourceId: article?.sourceId },
+      where: {
+        term: { in: [term], mode: "insensitive" },
+        sourceId: article?.sourceId,
+      },
       include: { ranking: true },
     })
     if (existingSourceTerm) {
@@ -102,6 +115,7 @@ export const learnSearchTerms = async ({
             data: {
               term: term,
               sourceId: article?.sourceId,
+              active: !isShortTerm, // Terms shorter than 3 characters need to be activated manually
             },
           })
           .then((createdTerm) => {

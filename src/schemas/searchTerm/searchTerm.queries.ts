@@ -15,9 +15,9 @@ export const searchTermQueries = extendType({
         if (term) {
           return await prisma.searchTerm.findFirst({
             where: {
-              term: { startsWith: term, mode: "insensitive" },
-              source: { is: null },
-              topic: { is: null },
+              term: {in: [term], mode: "insensitive" },
+              topic: { is: null }, // Ensure no topic is associated
+              source: { is: null }, // Ensure no source is associated
             },
           })
         } else if (id) {
@@ -42,7 +42,11 @@ export const searchTermQueries = extendType({
       ) => {
         const searchTerms = await prisma.searchTerm.findMany({
           where: {
-            term: { contains: query || "", mode: "insensitive" },
+            OR: [
+              { term: { startsWith: query || "", mode: "insensitive" } },
+              { term: { contains: query || "", mode: "insensitive" } },
+              { term: { equals: query || "", mode: "insensitive" } },
+            ],
             ranking: { isNot: null },
             active,
           },
@@ -67,9 +71,11 @@ export const searchTermQueries = extendType({
         { prisma }: Context
       ) => {
         const searchTerm = await prisma.searchTerm.findMany({
-          distinct: sourceId || topicId ? ["term"] : undefined,
           where: {
-            term: query ? { contains: query, mode: "insensitive" } : undefined,
+            OR: [
+              { term: { startsWith: query || "", mode: "insensitive" } },
+              { term: { contains: query || "", mode: "insensitive" } },
+            ],
             active: true, // Ensure the search term is active
             topicId: topicId ?? undefined,
             sourceId: sourceId ?? undefined,

@@ -4,33 +4,36 @@ import { extendType, nullable } from "nexus"
 
 import { Context } from "../../context"
 
-const getSearchQueryFilter = (query?: string, term?: SearchTerm) => ({
-  articles: {
-    OR: [
-      { title: { contains: query ?? term?.term, mode: "insensitive" } },
-      {
-        description: { contains: query ?? term?.term, mode: "insensitive" },
-      },
-    ],
-    source: term?.sourceId
-      ? {
-          id: term?.sourceId,
-        }
-      : undefined,
-    topic: term?.topicId
-      ? {
-          id: term?.topicId,
-        }
-      : undefined,
-  } as Prisma.ArticleWhereInput,
-  topics: {
-    category: { not: ArticleCategory.UNKNOWN },
-    name: { contains: query, mode: "insensitive" },
-  } as Prisma.TopicWhereInput,
-  sources: {
-    name: { contains: query, mode: "insensitive" },
-  } as Prisma.SourceWhereInput,
-})
+const getSearchQueryFilter = (query?: string, term?: SearchTerm) => {
+  const queryFilter = {
+    articles: {
+      OR: [
+        { title: { contains: query ?? term?.term, mode: "insensitive" } },
+        {
+          description: { contains: query ?? term?.term, mode: "insensitive" },
+        },
+      ],
+      source: term?.sourceId
+        ? {
+            id: term?.sourceId,
+          }
+        : undefined,
+      topic: term?.topicId
+        ? {
+            id: term?.topicId,
+          }
+        : undefined,
+    } as Prisma.ArticleWhereInput,
+    topics: {
+      category: { not: ArticleCategory.UNKNOWN },
+      name: { contains: query, mode: "insensitive" },
+    } as Prisma.TopicWhereInput,
+    sources: {
+      name: { contains: query, mode: "insensitive" },
+    } as Prisma.SourceWhereInput,
+  }
+  return queryFilter
+}
 
 export const searchQueries = extendType({
   type: "Query",
@@ -65,8 +68,8 @@ export const searchQueries = extendType({
                   AND: [{ topic: { is: null } }, { source: { is: null } }],
                 },
               ],
+              active: true,
             },
-            orderBy: { ranking: { mentions: "desc" } },
           })
           if (searchTerm) {
             query = query ?? searchTerm.term
@@ -87,23 +90,31 @@ export const searchQueries = extendType({
             where: queryFilter.articles,
             take: pagination?.limit || 10,
             skip: pagination?.offset || 0,
-            orderBy: { createdAt: "desc" },
+            orderBy: { ranking: { mentions: "desc" } },
           }),
           foundArticles: await prisma.article.count({
             where: queryFilter.articles,
           }),
-          topics: await prisma.topic.findMany({
-            where: queryFilter.topics,
-          }),
-          foundTopics: await prisma.topic.count({
-            where: queryFilter.topics,
-          }),
-          sources: await prisma.source.findMany({
-            where: queryFilter.sources,
-          }),
-          foundSources: await prisma.source.count({
-            where: queryFilter.sources,
-          }),
+          topics: term
+            ? []
+            : await prisma.topic.findMany({
+                where: queryFilter.topics,
+              }),
+          foundTopics: term
+            ? 0
+            : await prisma.topic.count({
+                where: queryFilter.topics,
+              }),
+          sources: term
+            ? []
+            : await prisma.source.findMany({
+                where: queryFilter.sources,
+              }),
+          foundSources: term
+            ? 0
+            : await prisma.source.count({
+                where: queryFilter.sources,
+              }),
         }
       },
     })

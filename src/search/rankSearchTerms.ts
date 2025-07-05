@@ -19,7 +19,7 @@ function getNGrams(words: string[], n: number): string[] {
 
 export function getMostFrequentTerms(text: string): string[] {
   const words = Array.from(
-    text.matchAll(/\d{1,3}(?:[.,]\d{3})+|\w+/g),
+    text.matchAll(/\d{1,3}(?:[.,]\d{3})+|[\w.-]*[\w](?<![.-])/g),
     (m) => m[0]
   )
   const stopwords = [...deu, ...eng]

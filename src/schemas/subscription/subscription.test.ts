@@ -6,8 +6,8 @@ import prisma from "../../prismaClient"
 
 describe("Integration test for subscription methods", () => {
   const createSubscriptionMutation = `
-    mutation createSubscription($sourceId: String, $editorId: String, $topicId: String) {
-      createSubscription(sourceId: $sourceId, editorId: $editorId, topicId: $topicId) {
+    mutation createSubscription($sourceId: String, $termID: String, $topicId: String) {
+      createSubscription(sourceId: $sourceId, termId: $termId, topicId: $topicId) {
         id
       }
     }

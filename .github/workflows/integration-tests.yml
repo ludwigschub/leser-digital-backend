@@ -49,7 +49,7 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres_user:postgres_password@localhost:5432/postgres_db
         run:
-          yarn db:seed --test
+          yarn db:seed --dry
       - name: Run jest tests
         env:
           DATABASE_URL: postgres://postgres_user:postgres_password@localhost:5432/postgres_db

@@ -13,42 +13,49 @@ export const getArticleSubscriptionsFilter = (
 ): Prisma.ArticleWhereInput => {
   return {
     OR: [
-      subscriptions.find((s) => s.searchTerm.sourceId)
-        ? {
-            source: {
-              id: {
-                in: subscriptions
-                  .map((s) => s.searchTerm.sourceId)
-                  .filter(Boolean),
+      ...(subscriptions
+        .filter((s) => s.searchTerm.term)
+        .map((s) => ({
+          OR: [
+            {
+              title: {
+                contains: s.searchTerm.term as string,
+                mode: "insensitive",
               },
             },
-          }
-        : undefined,
-      subscriptions.find((s) => s.searchTerm.editorId)
-        ? {
-            editors: {
-              every: {
-                id: {
-                  in: subscriptions
-                    .map((s) => s.searchTerm.editorId)
-                    .filter(Boolean),
-                },
+            {
+              description: {
+                contains: s.searchTerm.term as string,
+                mode: "insensitive",
               },
             },
-          }
-        : undefined,
-      subscriptions.find((s) => s.searchTerm.topicId)
-        ? {
-            topic: {
-              id: {
-                in: subscriptions
-                  .map((s) => s.searchTerm.topicId)
-                  .filter(Boolean),
-              },
-            },
-          }
-        : undefined,
-    ].filter(Boolean) as Prisma.ArticleWhereInput[],
+          ],
+          source: s.searchTerm.sourceId
+            ? {
+                id: s.searchTerm.sourceId,
+              }
+            : undefined,
+          topic: s.searchTerm.topicId
+            ? {
+                id: s.searchTerm.topicId,
+              }
+            : undefined,
+        })) as Prisma.ArticleWhereInput[]),
+      ...(subscriptions
+        .filter((s) => !s.searchTerm.term && s.searchTerm.sourceId)
+        .map((s) => ({
+          source: {
+            id: s.searchTerm.sourceId,
+          },
+        })) as Prisma.ArticleWhereInput[]),
+      ...(subscriptions
+        .filter((s) => !s.searchTerm.term && s.searchTerm.topicId)
+        .map((s) => ({
+          topic: {
+            id: s.searchTerm.topicId,
+          },
+        })) as Prisma.ArticleWhereInput[]),
+    ],
   }
 }
 
@@ -86,9 +93,15 @@ export const articleQueries = extendType({
             userSubscriptions.length > 0 &&
             !(args.filter?.source || args.filter?.editor)
           ) {
+            console.debug(
+              "User has subscriptions, applying filter based on subscriptions"
+            )
+            const subscriptionsFilter =
+              getArticleSubscriptionsFilter(userSubscriptions)
+            console.debug("Subscriptions filter:", subscriptionsFilter)
             return await prisma.article.findMany({
               where: {
-                ...getArticleSubscriptionsFilter(userSubscriptions),
+                ...subscriptionsFilter,
                 short: args.filter?.short ?? false,
               },
               include: {
@@ -313,6 +326,7 @@ export const articleQueries = extendType({
               ranking: {
                 searchTerms: {
                   some: {
+                    active: true,
                     id: {
                       in: userViewedSearchTerms
                         .filter((term) => term.active)

@@ -46,15 +46,20 @@ describe("Integration test for source methods", () => {
   test("should show the subscribers of a source", async () => {
     const firstSubscription = await prisma.subscription.findFirst({
       where: {
-        source: { isNot: null },
+        searchTerm: { source: { isNot: null } },
         user: { email: firstExampleUser?.email },
       },
+      include: { searchTerm: true },
     })
     const source = await prisma.source.findFirst({
-      where: { id: firstSubscription?.sourceId as string },
+      where: { id: firstSubscription?.searchTerm.sourceId as string },
     })
     const subscribers = await prisma.subscription.count({
-      where: { source: { id: firstSubscription?.sourceId as string } },
+      where: {
+        searchTerm: {
+          source: { id: firstSubscription?.searchTerm.sourceId as string },
+        },
+      },
     })
     const response = await executeQuery(
       sourceQuery,

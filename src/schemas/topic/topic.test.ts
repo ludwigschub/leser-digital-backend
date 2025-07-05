@@ -58,15 +58,20 @@ describe("Integration test for topic methods", () => {
   test("should show the subscribers of a source", async () => {
     const firstSubscription = await prisma.subscription.findFirst({
       where: {
-        topic: { isNot: null },
+        searchTerm: { topic: { isNot: null } },
         user: { email: firstExampleUser?.email },
       },
+      include: { searchTerm: true },
     })
     const topic = await prisma.topic.findFirst({
-      where: { id: firstSubscription?.topicId as string },
+      where: { id: firstSubscription?.searchTerm.topicId as string },
     })
     const subscribers = await prisma.subscription.count({
-      where: { topic: { id: firstSubscription?.topicId as string } },
+      where: {
+        searchTerm: {
+          topic: { id: firstSubscription?.searchTerm.topicId as string },
+        },
+      },
     })
     const response = await executeQuery(
       topicQuery,

@@ -16,14 +16,11 @@ export const SearchTerm = objectType({
     t.field(SearchTermType.updatedAt)
     t.nullable.field("ranking", {
       type: "Int",
-      resolve: async (parent, _arg, { prisma, user }: Context) => {
-        if (user?.role === "ADMIN") {
-          const ranking = await prisma.searchTermRanking.findFirst({
-            where: { searchTermId: parent.id },
-            orderBy: { createdAt: "desc" },
-          })
-          return Math.floor(ranking?.mentions || 0)
-        }
+      resolve: async (parent, _arg, { prisma }: Context) => {
+        const ranking = await prisma.searchTermRanking.findUnique({
+          where: { searchTermId: parent.id },
+        })
+        return Math.floor(ranking?.mentions || 0)
       },
     })
     t.field("subscribers", {
@@ -37,7 +34,7 @@ export const SearchTerm = objectType({
     t.nullable.field("isSubscribed", {
       type: "Subscription",
       resolve: async (parent, _arg, { prisma, user }: Context) => {
-        if (!user) return false
+        if (!user) return null
         const subscription = await prisma.subscription.findFirst({
           where: { searchTermId: parent.id, userId: user.id },
         })

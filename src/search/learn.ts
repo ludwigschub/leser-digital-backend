@@ -29,9 +29,10 @@ import { rankSearchTerms } from "./rankSearchTerms"
       orderBy: {
         createdAt: "desc", // Order by most recent articles first
       },
+      take: 100, // Limit to the most recent 100 articles
     })
   } else {
-    // Only learn search terms for articles created in the last 24 hours
+    // Only learn search terms for articles created in the last 7 days
     articles = await prisma.article.findMany({
       where: {
         createdAt: {
@@ -40,6 +41,10 @@ import { rankSearchTerms } from "./rankSearchTerms"
         ranking: {
           is: null, // Only learn search terms for articles that have not been ranked yet
         },
+      },
+      take: 100, // Limit to the most recent 100 articles
+      orderBy: {
+        createdAt: "desc", // Order by most recent articles first
       },
       include: {
         source: true,
